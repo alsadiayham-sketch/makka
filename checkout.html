@@ -77,6 +77,8 @@
             return {
                 name: sanitizePlainText(entry && entry.name ? entry.name : '', 120),
                 address: sanitizeMultilineText(entry && entry.address ? entry.address : '', 300),
+                contactName: sanitizePlainText(entry && entry.contactName ? entry.contactName : '', 120),
+                phone: sanitizePlainText(entry && entry.phone ? entry.phone : '', 20),
                 isDefault: !!(entry && entry.isDefault)
             };
         }
@@ -165,24 +167,64 @@
             var html = '';
             var selectedValue = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue();
             if (savedLocations.length) {
-                html += '<div class="saved-location-group"><label for="savedLocationSelect">اختر عنواناً محفوظاً</label><select id="savedLocationSelect" class="saved-location-select" onchange="handleSavedLocationChange(this.value)"><option value="manual">اكتب عنواناً جديداً</option>' + savedLocations.map(function (location, idx) { return '<option value="saved-' + idx + '"' + (selectedValue === ('saved-' + idx) ? ' selected' : '') + '>' + escapeHtml(location.name) + ' — ' + escapeHtml(location.address) + '</option>'; }).join('') + '</select></div>';
+                html += '<div class="saved-location-group"><label>اختر عنواناً محفوظاً</label><div class="saved-location-boxes">';
+                html += savedLocations.map(function (location, idx) {
+                    var val = 'saved-' + idx;
+                    var isSelected = selectedValue === val;
+                    return '<div class="saved-location-box' + (isSelected ? ' selected' : '') + '" onclick="selectSavedLocation(\'' + val + '\')">'
+                        + '<strong>' + escapeHtml(location.name) + '</strong>'
+                        + (location.contactName ? '<p>👤 ' + escapeHtml(location.contactName) + '</p>' : '')
+                        + (location.phone ? '<p>📞 ' + escapeHtml(location.phone) + '</p>' : '')
+                        + '<p>📍 ' + escapeHtml(location.address) + '</p>'
+                        + (location.isDefault ? '<span class="default-badge">افتراضي</span>' : '')
+                        + '</div>';
+                }).join('');
+                html += '<div class="saved-location-box add-new-box' + (selectedValue === 'manual' ? ' selected' : '') + '" onclick="selectSavedLocation(\'manual\')">'
+                    + '<span class="add-new-icon">＋</span>'
+                    + '<strong>إضافة معلومات جديدة</strong>'
+                    + '</div>';
+                html += '</div></div>';
             } else if (wholesaleMode) html += '<div class="saved-location-note">لا توجد عناوين محفوظة في حسابك حالياً. يمكنك كتابة عنوان جديد لإتمام الطلب.</div>';
             if (!wholesaleMode) {
                 html += '<div class="checkout-inline-grid"><input type="text" id="saveLocationName" class="checkout-inline-input" placeholder="اسم العنوان للحفظ لاحقاً" value="' + escapeHtml(values.saveLocationName || '') + '"><label class="checkout-checkbox-row"><input type="checkbox" id="saveLocationCheckbox"' + (values.saveLocationChecked ? ' checked' : '') + '>حفظ هذا العنوان لاستخدامه لاحقاً</label></div>';
             }
             return html;
         }
-        function handleSavedLocationChange(value) {
-            var addressNode = document.getElementById('custAddress');
-            var idx = -1;
+        function selectSavedLocation(value) {
             selectedSavedLocationValue = value || 'manual';
+            var idx = -1;
             if (selectedSavedLocationValue.indexOf('saved-') === 0) idx = parseInt(selectedSavedLocationValue.split('-')[1], 10);
-            if (idx >= 0 && savedLocations[idx] && addressNode) addressNode.value = savedLocations[idx].address;
+            var addressNode = document.getElementById('custAddress');
+            var nameNode = document.getElementById('custName');
+            var phoneNode = document.getElementById('custPhone');
+            var manualFields = document.querySelector('.checkout-manual-fields');
+            if (idx >= 0 && savedLocations[idx]) {
+                if (addressNode) addressNode.value = savedLocations[idx].address || '';
+                if (nameNode) nameNode.value = savedLocations[idx].contactName || '';
+                if (phoneNode) phoneNode.value = savedLocations[idx].phone || '';
+                if (manualFields) manualFields.style.display = 'none';
+            } else {
+                if (addressNode) addressNode.value = '';
+                if (nameNode) nameNode.value = '';
+                if (phoneNode) phoneNode.value = '';
+                if (manualFields) manualFields.style.display = '';
+            }
+            // Re-render boxes to update selected state
+            var boxesContainer = document.querySelector('.saved-location-boxes');
+            if (boxesContainer) {
+                var allBoxes = boxesContainer.querySelectorAll('.saved-location-box');
+                allBoxes.forEach(function(box) { box.classList.remove('selected'); });
+                var targetIdx = idx >= 0 ? idx : allBoxes.length - 1;
+                if (allBoxes[targetIdx]) allBoxes[targetIdx].classList.add('selected');
+            }
         }
+        function handleSavedLocationChange(value) { selectSavedLocation(value); }
         function saveRegularLocationIfNeeded(address) {
             if (wholesaleMode || selectedDelivery !== 'delivery') return;
             var checkbox = document.getElementById('saveLocationCheckbox');
             var nameNode = document.getElementById('saveLocationName');
+            var custNameNode = document.getElementById('custName');
+            var custPhoneNode = document.getElementById('custPhone');
             var safeAddress = sanitizeMultilineText(address || '', 300);
             var locations;
             var idx;
@@ -192,6 +234,8 @@
             locations.push({
                 name: sanitizePlainText(nameNode && nameNode.value ? nameNode.value : 'عنوان محفوظ', 120) || 'عنوان محفوظ',
                 address: safeAddress,
+                contactName: sanitizePlainText(custNameNode && custNameNode.value ? custNameNode.value : '', 120),
+                phone: sanitizePlainText(custPhoneNode && custPhoneNode.value ? custPhoneNode.value : '', 20),
                 isDefault: locations.length === 0
             });
             saveLocalSavedLocations(locations);
@@ -265,8 +309,8 @@
         function removeItem(productId, sizeIdx) { cart = cart.filter(function (item) { return !(String(item.id) === String(productId) && parseInt(item.sizeIdx, 10) === parseInt(sizeIdx, 10)); }); saveCart(); renderCheckout(); }
         function selectDelivery(method) { var values = getFormValues(); selectedDelivery = method; localStorage.setItem(DELIVERY_KEY, method); if (method === 'pickup') selectedRegion = 'westbank'; renderCheckout(); restoreFormValues(values); }
         function selectRegion(region) { var values = getFormValues(); selectedRegion = region; renderCheckout(); restoreFormValues(values); }
-        function getFormValues() { return { name: (document.getElementById('custName') || {}).value || '', phone: (document.getElementById('custPhone') || {}).value || '', address: (document.getElementById('custAddress') || {}).value || '', notes: (document.getElementById('custNotes') || {}).value || '', savedLocationValue: (document.getElementById('savedLocationSelect') || {}).value || selectedSavedLocationValue || 'manual', saveLocationName: (document.getElementById('saveLocationName') || {}).value || '', saveLocationChecked: !!((document.getElementById('saveLocationCheckbox') || {}).checked) }; }
-        function restoreFormValues(values) { var name = document.getElementById('custName'); var phone = document.getElementById('custPhone'); var address = document.getElementById('custAddress'); var notes = document.getElementById('custNotes'); var savedLocationSelect = document.getElementById('savedLocationSelect'); var saveLocationName = document.getElementById('saveLocationName'); var saveLocationCheckbox = document.getElementById('saveLocationCheckbox'); if (name) name.value = values.name || ''; if (phone) phone.value = values.phone || ''; if (address) address.value = values.address || ''; if (notes) notes.value = values.notes || ''; if (savedLocationSelect) savedLocationSelect.value = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue(); if (saveLocationName) saveLocationName.value = values.saveLocationName || ''; if (saveLocationCheckbox) saveLocationCheckbox.checked = !!values.saveLocationChecked; selectedSavedLocationValue = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue(); if (address && !address.value && selectedSavedLocationValue.indexOf('saved-') === 0) handleSavedLocationChange(selectedSavedLocationValue); }
+        function getFormValues() { return { name: (document.getElementById('custName') || {}).value || '', phone: (document.getElementById('custPhone') || {}).value || '', address: (document.getElementById('custAddress') || {}).value || '', notes: (document.getElementById('custNotes') || {}).value || '', savedLocationValue: selectedSavedLocationValue || 'manual', saveLocationName: (document.getElementById('saveLocationName') || {}).value || '', saveLocationChecked: !!((document.getElementById('saveLocationCheckbox') || {}).checked) }; }
+        function restoreFormValues(values) { var name = document.getElementById('custName'); var phone = document.getElementById('custPhone'); var address = document.getElementById('custAddress'); var notes = document.getElementById('custNotes'); var saveLocationName = document.getElementById('saveLocationName'); var saveLocationCheckbox = document.getElementById('saveLocationCheckbox'); if (name) name.value = values.name || ''; if (phone) phone.value = values.phone || ''; if (address) address.value = values.address || ''; if (notes) notes.value = values.notes || ''; if (saveLocationName) saveLocationName.value = values.saveLocationName || ''; if (saveLocationCheckbox) saveLocationCheckbox.checked = !!values.saveLocationChecked; selectedSavedLocationValue = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue(); if (address && !address.value && selectedSavedLocationValue.indexOf('saved-') === 0) selectSavedLocation(selectedSavedLocationValue); }
         function setCheckoutFieldError(fieldId, message) {
             var field = document.getElementById(fieldId);
             var errorNode = document.getElementById(fieldId + 'Error');
@@ -299,7 +343,9 @@
             var html = '<div class="checkout-grid"><div><div class="checkout-card"><h3>المنتجات (' + getItemsCount() + ' قطعة)</h3><div class="checkout-items">' + itemsHtml + '</div></div>';
             html += '<div class="checkout-card" style="margin-top:18px;"><h3>طريقة الاستلام</h3><div class="delivery-options"><div class="delivery-option ' + (selectedDelivery === 'pickup' ? 'selected' : '') + '" onclick="selectDelivery(\'pickup\')"><strong>استلام ذاتي</strong><p>من المعرض أو المخزن حسب التنسيق.</p></div><div class="delivery-option ' + (selectedDelivery === 'delivery' ? 'selected' : '') + '" onclick="selectDelivery(\'delivery\')"><strong>توصيل</strong><p>' + (wholesaleMode ? 'سيتم تنسيق تكلفة التوصيل عند تأكيد طلب الجملة.' : 'اختر المنطقة لحساب تكلفة التوصيل.') + '</p></div></div>';
             if (selectedDelivery === 'delivery') html += '<div class="region-options" style="margin-top:14px;"><div class="region-option ' + (selectedRegion === 'westbank' ? 'selected' : '') + '" onclick="selectRegion(\'westbank\')">الضفة' + (wholesaleMode ? '' : '<br><small>₪20</small>') + '</div><div class="region-option ' + (selectedRegion === 'jerusalem' ? 'selected' : '') + '" onclick="selectRegion(\'jerusalem\')">القدس' + (wholesaleMode ? '' : '<br><small>₪30</small>') + '</div><div class="region-option ' + (selectedRegion === 'inside' ? 'selected' : '') + '" onclick="selectRegion(\'inside\')">الداخل' + (wholesaleMode ? '' : '<br><small>₪50</small>') + '</div></div>';
-            html += '</div><div class="checkout-card" style="margin-top:18px;"><h3>معلومات التواصل</h3><p class="checkout-required-note">الحقول المعلّمة بعلامة * مطلوبة لإتمام الطلب.</p><div class="checkout-form-grid"><div class="checkout-field required"><label for="custName">الاسم الكامل</label><input type="text" id="custName" class="checkout-input" placeholder="الاسم الكامل" required><div class="checkout-field-error" id="custNameError"></div></div><div class="checkout-field required"><label for="custPhone">رقم الهاتف</label><input type="tel" id="custPhone" class="checkout-input" placeholder="05xxxxxxxx" inputmode="numeric" required><div class="checkout-field-error" id="custPhoneError"></div></div>' + renderSavedLocationsHtml(values) + '<div class="checkout-field required" ' + (selectedDelivery === 'pickup' ? 'style="display:none;"' : '') + '><label for="custAddress">' + (wholesaleMode ? 'عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '</label><textarea id="custAddress" class="checkout-textarea" placeholder="' + (wholesaleMode ? 'اكتب عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '" ' + (selectedDelivery === 'pickup' ? 'style="display:none;"' : '') + '></textarea><div class="checkout-field-error" id="custAddressError"></div></div><div class="checkout-field"><label for="custNotes">ملاحظات إضافية</label><textarea id="custNotes" class="checkout-textarea" placeholder="ملاحظات إضافية (اختياري)"></textarea></div>' + (wholesaleMode ? '<div class="checkout-note-box">وضع الجملة مفعل: لن يتم عرض الأسعار، وسيتم إرسال الطلب عبر واتساب فقط بعنوان <strong>طلب جملة</strong>.</div>' : '') + '</div></div></div>';
+            var hasSavedSelected = selectedSavedLocationValue && selectedSavedLocationValue !== 'manual' && savedLocations.length;
+            var hideManualFields = hasSavedSelected && selectedDelivery === 'delivery';
+            html += '</div><div class="checkout-card" style="margin-top:18px;"><h3>معلومات التواصل</h3><p class="checkout-required-note">الحقول المعلّمة بعلامة * مطلوبة لإتمام الطلب.</p><div class="checkout-form-grid">' + renderSavedLocationsHtml(values) + '<div class="checkout-manual-fields" ' + (hideManualFields ? 'style="display:none;"' : '') + '><div class="checkout-field required"><label for="custName">الاسم الكامل</label><input type="text" id="custName" class="checkout-input" placeholder="الاسم الكامل" required><div class="checkout-field-error" id="custNameError"></div></div><div class="checkout-field required"><label for="custPhone">رقم الهاتف</label><input type="tel" id="custPhone" class="checkout-input" placeholder="05xxxxxxxx" inputmode="numeric" required><div class="checkout-field-error" id="custPhoneError"></div></div><div class="checkout-field required" ' + (selectedDelivery === 'pickup' ? 'style="display:none;"' : '') + '><label for="custAddress">' + (wholesaleMode ? 'عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '</label><textarea id="custAddress" class="checkout-textarea" placeholder="' + (wholesaleMode ? 'اكتب عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '"></textarea><div class="checkout-field-error" id="custAddressError"></div></div></div><div class="checkout-field"><label for="custNotes">ملاحظات إضافية</label><textarea id="custNotes" class="checkout-textarea" placeholder="ملاحظات إضافية (اختياري)"></textarea></div>' + (wholesaleMode ? '<div class="checkout-note-box">وضع الجملة مفعل: لن يتم عرض الأسعار، وسيتم إرسال الطلب عبر واتساب فقط بعنوان <strong>طلب جملة</strong>.</div>' : '') + '</div></div></div>';
             html += '<div><div class="checkout-card"><h3>ملخص الطلب</h3><div class="checkout-summary"><div class="checkout-summary-row"><span>عدد المنتجات</span><strong>' + getItemsCount() + ' قطعة</strong></div><div class="checkout-summary-row"><span>المجموع الفرعي</span><strong>' + (wholesaleMode ? 'السعر حسب الاتفاق' : formatCurrency(getSubtotal())) + '</strong></div><div class="checkout-summary-row"><span>التوصيل</span><strong>' + getDeliveryLabel() + '</strong></div><div class="checkout-summary-row total"><span>الإجمالي</span><strong>' + getTotalLabel() + '</strong></div></div><button type="button" class="checkout-submit" id="confirmOrderBtn" onclick="confirmOrder()">' + (wholesaleMode ? 'إرسال طلب الجملة عبر واتساب' : 'حفظ الطلب وإرساله') + '</button></div></div></div>';
             container.innerHTML = html; restoreFormValues(values); bindCheckoutValidation();
         }
@@ -328,9 +374,20 @@
             else window.location.href = 'confirmation.html';
         }
         function confirmOrder() {
-            var name = sanitizePlainText((document.getElementById('custName').value || '').trim(), 120);
-            var phone = sanitizePhoneNumber((document.getElementById('custPhone').value || '').trim());
-            var address = sanitizeMultilineText((document.getElementById('custAddress') ? document.getElementById('custAddress').value : '').trim(), 400);
+            var savedIdx = -1;
+            var name, phone, address;
+            if (selectedSavedLocationValue && selectedSavedLocationValue.indexOf('saved-') === 0) {
+                savedIdx = parseInt(selectedSavedLocationValue.split('-')[1], 10);
+            }
+            if (savedIdx >= 0 && savedLocations[savedIdx]) {
+                name = sanitizePlainText(savedLocations[savedIdx].contactName || '', 120);
+                phone = sanitizePhoneNumber(savedLocations[savedIdx].phone || '');
+                address = sanitizeMultilineText(savedLocations[savedIdx].address || '', 400);
+            } else {
+                name = sanitizePlainText((document.getElementById('custName').value || '').trim(), 120);
+                phone = sanitizePhoneNumber((document.getElementById('custPhone').value || '').trim());
+                address = sanitizeMultilineText((document.getElementById('custAddress') ? document.getElementById('custAddress').value : '').trim(), 400);
+            }
             clearCheckoutFieldError('custName');
             clearCheckoutFieldError('custPhone');
             clearCheckoutFieldError('custAddress');

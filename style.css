@@ -238,6 +238,7 @@ header { position: relative; z-index: 1200; }
 .checkout-summary-row { padding-bottom: 10px; border-bottom: 1px solid rgba(91, 55, 27, 0.08); color: var(--charcoal); }
 .checkout-summary-row.total { color: var(--primary-dark); font-size: 1.12rem; font-weight: 800; }
 .checkout-form-grid { display: grid; gap: 14px; }
+.checkout-manual-fields { display: grid; gap: 14px; }
 .checkout-textarea { min-height: 96px; resize: vertical; }
 .delivery-options, .region-options { display: grid; gap: 10px; }
 .delivery-option, .region-option { min-height: 44px; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(91, 55, 27, 0.12); background: rgba(255,255,255,0.74); cursor: pointer; }
@@ -258,6 +259,15 @@ header { position: relative; z-index: 1200; }
 .checkout-success-card { padding: 34px 24px; text-align: center; }
 .saved-location-group, .saved-location-note, .checkout-checkbox-row, .checkout-inline-grid { margin-top: 14px; }
 .saved-location-group label, .checkout-checkbox-row label { display: block; margin-bottom: 6px; color: var(--primary-dark); font-weight: 700; }
+.saved-location-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+.saved-location-box { padding: 14px 16px; border-radius: 18px; border: 2px solid rgba(91, 55, 27, 0.12); background: rgba(255,255,255,0.74); cursor: pointer; transition: all 0.3s; position: relative; }
+.saved-location-box:hover { border-color: rgba(156, 88, 32, 0.3); box-shadow: 0 4px 12px rgba(91, 55, 27, 0.1); }
+.saved-location-box.selected { border-color: var(--primary); box-shadow: 0 8px 20px rgba(91, 55, 27, 0.15); background: rgba(255, 247, 237, 0.9); }
+.saved-location-box strong { display: block; color: var(--primary-dark); font-size: 0.95rem; margin-bottom: 6px; }
+.saved-location-box p { margin: 4px 0; color: var(--charcoal); font-size: 0.85rem; line-height: 1.4; }
+.saved-location-box .default-badge { position: absolute; top: 8px; left: 8px; background: var(--primary); color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; font-weight: 700; }
+.saved-location-box.add-new-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-style: dashed; min-height: 100px; }
+.saved-location-box.add-new-box .add-new-icon { font-size: 1.8rem; color: var(--primary); margin-bottom: 6px; }
 .saved-location-select, .checkout-inline-input { width: 100%; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(91, 55, 27, 0.14); background: rgba(255,255,255,0.86); color: var(--primary-dark); outline: none; }
 .saved-location-note { padding: 12px 14px; border-radius: 16px; background: rgba(139, 90, 43, 0.06); color: var(--charcoal); font-size: 0.92rem; }
 .checkout-inline-grid { display: grid; gap: 12px; }

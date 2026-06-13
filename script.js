@@ -899,7 +899,10 @@ function renderWholesaleProfileLocations(user) {
         return;
     }
     container.innerHTML = locations.map(function (location, index) {
-        return '<article class="profile-address-card' + (location.isDefault ? ' default' : '') + '"><div class="profile-address-head"><div><h4>' + escapeHtml(location.name) + '</h4><p>' + escapeHtml(location.address) + '</p></div>' + (location.isDefault ? '<span class="profile-address-badge">الافتراضي</span>' : '') + '</div><div class="profile-address-actions">' + (location.isDefault ? '' : '<button type="button" class="profile-address-btn" onclick="setWholesaleDefaultLocation(' + index + ')">تعيين كافتراضي</button>') + '<button type="button" class="profile-address-delete" onclick="deleteWholesaleLocation(' + index + ')">حذف العنوان</button></div></article>';
+        var contactInfo = '';
+        if (location.contactName) contactInfo += '<p>👤 ' + escapeHtml(location.contactName) + '</p>';
+        if (location.phone) contactInfo += '<p>📞 ' + escapeHtml(location.phone) + '</p>';
+        return '<article class="profile-address-card' + (location.isDefault ? ' default' : '') + '"><div class="profile-address-head"><div><h4>' + escapeHtml(location.name) + '</h4>' + contactInfo + '<p>📍 ' + escapeHtml(location.address) + '</p></div>' + (location.isDefault ? '<span class="profile-address-badge">الافتراضي</span>' : '') + '</div><div class="profile-address-actions">' + (location.isDefault ? '' : '<button type="button" class="profile-address-btn" onclick="setWholesaleDefaultLocation(' + index + ')">تعيين كافتراضي</button>') + '<button type="button" class="profile-address-delete" onclick="deleteWholesaleLocation(' + index + ')">حذف العنوان</button></div></article>';
     }).join('');
     var checkbox = document.getElementById('wholesaleLocationDefault');
     if (checkbox) {
@@ -929,19 +932,25 @@ function handleWholesaleLocationSubmit(event) {
     if (!wholesaleProfileUser) { setWholesaleProfileMessage('تعذر إضافة العنوان حالياً.', 'error'); return; }
     var nameNode = document.getElementById('wholesaleLocationName');
     var addressNode = document.getElementById('wholesaleLocationAddress');
+    var contactNameNode = document.getElementById('wholesaleLocationContactName');
+    var phoneNode = document.getElementById('wholesaleLocationPhone');
     var defaultNode = document.getElementById('wholesaleLocationDefault');
     var name = sanitizePlainText((nameNode || {}).value || '', 120);
     var address = sanitizeMultilineText((addressNode || {}).value || '', 300);
+    var contactName = sanitizePlainText((contactNameNode || {}).value || '', 120);
+    var phone = sanitizePlainText((phoneNode || {}).value || '', 20);
     var locations = normalizeWholesaleLocationsList(wholesaleProfileUser);
     var shouldDefault = !!(defaultNode && defaultNode.checked);
     var idx;
     if (!name || !address) { setWholesaleProfileMessage('أدخل اسم العنوان والعنوان الكامل أولاً.', 'error'); return; }
     if (!locations.length) shouldDefault = true;
     if (shouldDefault) for (idx = 0; idx < locations.length; idx += 1) locations[idx].isDefault = false;
-    locations.push({ name: name, address: address, isDefault: shouldDefault });
+    locations.push({ name: name, address: address, contactName: contactName, phone: phone, isDefault: shouldDefault });
     saveWholesaleLocations(locations, 'تمت إضافة العنوان بنجاح.');
     if (nameNode) nameNode.value = '';
     if (addressNode) addressNode.value = '';
+    if (contactNameNode) contactNameNode.value = '';
+    if (phoneNode) phoneNode.value = '';
     if (defaultNode) defaultNode.checked = false;
 }
 function setWholesaleDefaultLocation(index) {
