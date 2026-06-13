@@ -4,89 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makka Carpentry Supplies | إتمام الطلب</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <meta name="description" content="أكمل طلبك من شركة مكة، راجع المنتجات، اختر التوصيل، ثم احفظ الطلب وأرسله بسهولة.">
+    <meta property="og:title" content="شركة مكة | إتمام الطلب">
+    <meta property="og:description" content="راجع السلة، أدخل بياناتك، وأرسل الطلب إلى شركة مكة بسهولة.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="logo.png">
+    <meta property="og:locale" content="ar_PS">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .checkout-page { min-height: 100vh; padding: 100px 20px 60px; background: var(--bg); }
-        .checkout-container { max-width: 900px; margin: 0 auto; }
-        .checkout-title { text-align: center; font-size: 2rem; font-weight: 900; color: var(--primary-dark); margin-bottom: 30px; }
-        .checkout-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; }
-        .checkout-card { background: white; border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); }
-        .checkout-card h3 { font-size: 1.2rem; color: var(--primary-dark); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--primary-lighter); }
-        .checkout-item { display: flex; gap: 12px; padding: 12px; background: var(--bg-alt); border-radius: 12px; margin-bottom: 10px; align-items: center; }
-        .checkout-item img { width: 60px; height: 60px; object-fit: contain; border-radius: 8px; background: white; padding: 4px; }
-        .checkout-item.custom-package-checkout { align-items: flex-start; }
-        .checkout-item-media { width: 60px; height: 60px; border-radius: 14px; background: var(--primary-lighter); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-        .custom-package-badge { display: inline-block; margin-top: 4px; font-size: 0.85rem; color: var(--primary-dark); font-weight: 700; }
-        .checkout-item-note, .checkout-item-meta-block { display: block; color: var(--text-light); font-size: 0.85rem; line-height: 1.7; margin-top: 6px; }
-        .checkout-item-price.pending { color: var(--primary-dark); font-size: 0.95rem; }
-        .checkout-success-card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); text-align: center; }
-        .checkout-success-card h3 { margin-bottom: 10px; color: var(--primary-dark); font-size: 1.4rem; }
-        .checkout-success-card p { color: var(--text-light); margin-bottom: 18px; line-height: 1.9; }
-        .checkout-success-order-id { display: inline-flex; padding: 10px 16px; border-radius: 999px; background: var(--primary-lighter); color: var(--primary-dark); font-weight: 800; margin-bottom: 18px; }
-        .checkout-success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .checkout-success-actions a, .checkout-success-actions button { min-width: 190px; padding: 14px 18px; border-radius: 12px; border: none; font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.96rem; cursor: pointer; text-decoration: none; transition: var(--transition); }
-        .checkout-success-actions .btn-success-whatsapp { background: #25d366; color: white; }
-        .checkout-success-actions .btn-success-whatsapp:hover { background: #1da851; }
-        .checkout-success-actions .btn-success-back { background: var(--primary); color: white; }
-        .checkout-success-actions .btn-success-back:hover { background: var(--primary-dark); }
-        .checkout-item-info { flex: 1; }
-        .checkout-item-info h4 { font-size: 0.95rem; margin-bottom: 3px; }
-        .checkout-item-info .item-brand, .checkout-item-info .item-size { display: block; font-size: 0.8rem; color: var(--text-light); }
-        .checkout-item-qty { display: flex; align-items: center; gap: 0; border: 2px solid var(--primary-light); border-radius: 20px; overflow: hidden; }
-        .checkout-item-qty button { width: 28px; height: 28px; border: none; background: var(--primary-lighter); color: var(--primary); font-weight: 700; cursor: pointer; font-size: 1rem; transition: var(--transition); }
-        .checkout-item-qty button:hover { background: var(--primary); color: white; }
-        .checkout-item-qty span { min-width: 28px; text-align: center; font-weight: 700; font-size: 0.9rem; }
-        .checkout-item-price { font-weight: 700; color: var(--primary); min-width: 60px; text-align: center; }
-        .checkout-item-remove { background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; opacity: 0.6; transition: var(--transition); }
-        .checkout-item-remove:hover { opacity: 1; }
-        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; }
-        .summary-row.total { border-bottom: none; padding-top: 15px; font-size: 1.3rem; font-weight: 900; color: var(--primary-dark); }
-        .summary-row .label { color: var(--text-light); }
-        .delivery-options { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
-        .delivery-option { display: flex; align-items: center; gap: 12px; padding: 15px; border: 2px solid var(--primary-light); border-radius: 12px; cursor: pointer; transition: var(--transition); }
-        .delivery-option:hover { border-color: var(--primary); background: var(--primary-lighter); }
-        .delivery-option.selected { border-color: var(--primary); background: var(--primary-lighter); }
-        .delivery-option .radio-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--primary-light); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-        .delivery-option.selected .radio-dot { border-color: var(--primary); }
-        .delivery-option.selected .radio-dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
-        .delivery-option-info h4 { font-size: 0.95rem; }
-        .delivery-option-info p { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.95rem; transition: var(--transition); }
-        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(212,175,55,0.18); }
-        .btn-whatsapp-order { width: 100%; padding: 14px; background: #25d366; color: white; border: none; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition); margin-top: 10px; text-decoration: none; display: block; text-align: center; }
-        .btn-whatsapp-order:hover { background: #1da851; }
-        .btn-whatsapp-order:disabled { opacity: 0.6; cursor: wait; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
-        .empty-checkout { text-align: center; padding: 60px; background: white; border-radius: var(--radius); box-shadow: var(--shadow); }
-        .empty-checkout span { font-size: 3rem; display: block; margin-bottom: 15px; color: var(--primary); }
-        .empty-checkout p { color: var(--text-light); margin-bottom: 20px; }
-        .empty-checkout a { display: inline-block; padding: 12px 30px; background: var(--primary); color: white; text-decoration: none; border-radius: 25px; font-weight: 700; }
-        .region-options { display: flex; gap: 10px; flex-wrap: wrap; }
-        .region-option { flex: 1; min-width: 80px; padding: 12px 16px; border: 2px solid var(--primary-light); border-radius: 12px; cursor: pointer; text-align: center; transition: var(--transition); display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .region-option:hover { border-color: var(--primary); background: var(--primary-lighter); }
-        .region-option.selected { border-color: var(--primary); background: var(--primary-lighter); }
-        .region-option span:first-child { font-weight: 700; font-size: 0.95rem; }
-        .region-cost { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
-        .checkout-status { text-align: center; margin-bottom: 18px; color: var(--text-light); font-weight: 600; }
-        .checkout-status.error { color: #b91c1c; }
-        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } .checkout-page { padding: 80px 15px 40px; } }
-    </style>
+    <link rel="icon" href="logo.png">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container nav-container" style="justify-content: space-between;">
-            <a href="index.html" class="logo"><img src="logo.png" alt="Makka Carpentry Supplies" class="logo-img"><span class="logo-text" style="font-size:1rem;">Makka Carpentry Supplies</span></a>
-            <a href="index.html" style="color: var(--primary-dark); text-decoration: none; font-weight: 600; font-size: 0.95rem; white-space: nowrap; padding: 8px 20px; margin-left: 10px;">← الرئيسية</a>
-        </div>
+    <nav class="navbar scrolled" id="navbar" style="background: rgba(255,250,244,0.96);">
+        <a href="index.html" class="brand"><img src="logo.png" alt="AMK" class="brand-logo"><span style="color: var(--primary-dark);">AMK</span></a>
+        <div class="nav-links"><a href="index.html" style="color: var(--primary-dark);">الرئيسية</a><a href="category.html?type=%D9%81%D8%B5%D8%A7%D9%84%D9%8A%D8%A7%D8%AA" style="color: var(--primary-dark);">الأقسام</a></div>
+        <div class="nav-actions"><div class="cart-icon" style="background: rgba(139,90,43,0.08); color: var(--primary-dark);">📋</div></div>
     </nav>
 
     <div class="checkout-page">
         <div class="checkout-container">
-            <a href="index.html" class="back-link">→ العودة للتسوق</a>
+            <a href="index.html" class="checkout-back-link">← العودة للتسوق</a>
             <h1 class="checkout-title">إتمام الطلب</h1>
             <p class="checkout-status" id="checkoutStatus">جاري تحميل بيانات الطلب...</p>
             <div id="checkoutContent"></div>
@@ -98,371 +37,337 @@
     <script src="firebase-config.js"></script>
     <script src="data.js"></script>
     <script>
-        var FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2216%22 fill=%22%23fdf8e8%22/%3E%3Ctext x=%2250%22 y=%2257%22 text-anchor=%22middle%22 font-size=%2218%22 fill=%22%23d4af37%22%3EIMG%3C/text%3E%3C/svg%3E";
+        var FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22 viewBox=%220 0 400 400%22%3E%3Crect width=%22400%22 height=%22400%22 fill=%22%23c97a34%22/%3E%3Ctext x=%22200%22 y=%22210%22 font-family=%22Arial%22 font-size=%2248%22 fill=%22%23fff%22 text-anchor=%22middle%22%3EAMK%3C/text%3E%3C/svg%3E";
+        var CART_KEY = 'makka_cart';
+        var WHOLESALE_KEY = 'makka_wholesale';
+        var WHOLESALE_SESSION_KEY = 'makka_wholesale_session';
+        var DELIVERY_KEY = 'makka_delivery_method';
+        var LEGACY_CART_KEY = 'drenasshop_cart';
+        var LEGACY_DELIVERY_KEY = 'drenasshop_delivery_method';
+        var DELIVERY_COSTS = { westbank: 20, jerusalem: 30, inside: 50 };
+        var DELIVERY_LABELS = { westbank: 'الضفة', jerusalem: 'القدس', inside: 'الداخل', pickup: 'استلام ذاتي' };
         var products = normalizeProducts(DEFAULT_PRODUCTS);
         var discounts = normalizeDiscounts(DEFAULT_DISCOUNTS);
         var siteSettings = normalizeSettings(DEFAULT_SITE_SETTINGS);
-        var cart = normalizeCartItems(JSON.parse(localStorage.getItem('drenasshop_cart') || '[]'), products);
-        var selectedDelivery = localStorage.getItem('drenasshop_delivery_method') || 'delivery';
-        var selectedRegion = '';
+        var cart = normalizeCartItems(loadStoredCart(), products);
+        var productIndex = {};
+        var selectedDelivery = localStorage.getItem(DELIVERY_KEY) || localStorage.getItem(LEGACY_DELIVERY_KEY) || 'delivery';
+        var selectedRegion = 'westbank';
+        var wholesaleMode = (getQueryParam('wholesale') === 'true') || localStorage.getItem(WHOLESALE_KEY) === 'true';
+        var wholesaleSession = loadWholesaleSession();
+        var savedLocations = [];
+        var selectedSavedLocationValue = '';
+        var checkoutFieldErrors = {};
 
-        var DELIVERY_COSTS = { westbank: 20, jerusalem: 30, inside: 50 };
-        var DELIVERY_LABELS = { westbank: 'الضفة', jerusalem: 'القدس', inside: 'الداخل' };
-
-        document.addEventListener('DOMContentLoaded', initializeCheckout);
-
-        function initializeCheckout() {
-            cart = normalizeCartItems(JSON.parse(localStorage.getItem('drenasshop_cart') || '[]'), products);
-            saveCart();
-            render();
-            setStatus('');
-
-            if (window.db) {
-                db.collection('products').onSnapshot(function (snap) {
-                    if (!snap.empty) {
-                        products = snap.docs.map(function (docSnap) { var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d); });
-                    }
-                    cart = normalizeCartItems(JSON.parse(localStorage.getItem('drenasshop_cart') || '[]'), products);
-                    saveCart();
-                    render();
-                });
-                db.collection('discounts').onSnapshot(function (snap) {
-                    discounts = snap.docs.map(function (docSnap) { return normalizeDiscount(docSnap.data()); });
-                    render();
-                });
-                db.collection('settings').doc('config').onSnapshot(function (docSnap) {
-                    siteSettings = normalizeSettings(docSnap.exists ? docSnap.data() : DEFAULT_SITE_SETTINGS);
-                });
+        function getQueryParam(name) {
+            var search = window.location.search.replace(/^\?/, '');
+            if (!search) return '';
+            var parts = search.split('&');
+            var idx;
+            for (idx = 0; idx < parts.length; idx += 1) {
+                var pair = parts[idx].split('=');
+                if (decodeURIComponent(pair[0]) === name) return pair.length > 1 ? decodeURIComponent(pair.slice(1).join('=').replace(/\+/g, ' ')) : '';
             }
+            return '';
         }
-
-        function setStatus(message, type) {
-            var status = document.getElementById('checkoutStatus');
-            if (!status) return;
-            status.textContent = message;
-            status.className = 'checkout-status' + (type ? ' ' + type : '');
-            status.style.display = message ? 'block' : 'none';
+        function loadStoredCart() { try { return JSON.parse(localStorage.getItem(CART_KEY) || localStorage.getItem(LEGACY_CART_KEY) || '[]'); } catch (error) { return []; } }
+        function loadWholesaleSession() { try { return JSON.parse(localStorage.getItem(WHOLESALE_SESSION_KEY) || 'null'); } catch (error) { return null; } }
+        function normalizeWholesaleEmail(email) { return String(email || '').trim().toLowerCase(); }
+        function normalizeLocationEntry(entry) {
+            return {
+                name: sanitizePlainText(entry && entry.name ? entry.name : '', 120),
+                address: sanitizeMultilineText(entry && entry.address ? entry.address : '', 300),
+                isDefault: !!(entry && entry.isDefault)
+            };
         }
-
-        function getCheckoutItemsCount() {
-            return cart.reduce(function (sum, item) {
-                return sum + Math.max(1, parseInt(item.qty, 10) || 1);
-            }, 0);
-        }
-
-        function renderCustomCheckoutItem(item) {
-            var details = getCustomPackageSetsHtml(item.sets);
-            var meta = '<span class="checkout-item-meta-block">لون التغليف: ' + getWrapperColorLabel(item.wrapperColor) + '</span>';
-            meta += '<span class="checkout-item-meta-block">طريقة الاستلام: ' + (item.delivery === 'pickup' ? 'استلام من المصنع' : 'توصيل') + '</span>';
-            meta += '<span class="checkout-item-meta-block">الاسم: ' + escapeHtml(item.customerName) + ' • الهاتف: ' + escapeHtml(item.customerPhone) + '</span>';
-            if (item.delivery === 'delivery' && item.customerLocation) meta += '<span class="checkout-item-meta-block">الموقع: ' + escapeHtml(item.customerLocation) + '</span>';
-            if (item.notes) meta += '<span class="checkout-item-note">ملاحظات: ' + escapeHtml(item.notes) + '</span>';
-            return '<div class="checkout-item custom-package-checkout"><div class="checkout-item-media">🎁</div><div class="checkout-item-info"><h4>' + getCustomPackageTitle(item) + '</h4><span class="custom-package-badge">سعر يحدد بعد المراجعة</span><div class="custom-package-sets">' + details + '</div>' + meta + '</div><div class="checkout-item-price pending">يحدد لاحقاً</div><button class="checkout-item-remove" onclick="removeItem(\'' + item.id + '\', -1)">✕</button></div>';
-        }
-
-        function render() {
-            var container = document.getElementById('checkoutContent');
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="empty-checkout"><span>•</span><p>السلة فارغة! أضيفي منتجات أولاً</p><a href="index.html">تسوقي الآن</a></div>';
-                return;
-            }
-
-            var itemsHTML = cart.map(function (item) {
-                if (item.type === 'custom_package') return renderCustomCheckoutItem(item);
-                var product = products.find(function (entry) { return entry.id === item.id; });
-                if (!product) return '';
-                var sizeData = getSizeData(product, item.sizeIdx);
-                var pricing = getFinalPrice(product, item.sizeIdx, discounts);
-                var lineTotal = pricing.final * item.qty;
-                return '<div class="checkout-item"><img src="' + product.image + '" alt="' + product.name + '"><div class="checkout-item-info"><h4>' + product.name + '</h4><span class="item-brand">' + product.brand + '</span><span class="item-size">' + getSizeLabel(sizeData) + '</span></div><div class="checkout-item-qty"><button onclick="changeQty(\'' + item.id + '\', ' + item.sizeIdx + ', -1)">−</button><span>' + item.qty + '</span><button onclick="changeQty(\'' + item.id + '\', ' + item.sizeIdx + ', 1)">+</button></div><div class="checkout-item-price">' + formatCurrency(lineTotal) + '</div><button class="checkout-item-remove" onclick="removeItem(\'' + item.id + '\', ' + item.sizeIdx + ')">✕</button></div>';
-            }).join('');
-
-            var subtotal = getSubtotal();
-            var itemCount = getCheckoutItemsCount();
-            var hasPending = hasCustomPricingPending(cart);
-            var formData = getFormValues();
-            var html = '';
-            html += '<div class="checkout-grid">';
-            html += '<div>';
-            html += '<div class="checkout-card">';
-            html += '<h3>المنتجات (' + itemCount + ' قطعة)</h3>';
-            html += itemsHTML;
-            html += '</div>';
-            html += '<div class="checkout-card" style="margin-top:20px;">';
-            html += '<h3>طريقة الاستلام</h3>';
-            html += '<div class="delivery-options">';
-            html += '<div class="delivery-option ' + (selectedDelivery === 'pickup' ? 'selected' : '') + '" onclick="selectDelivery(\'pickup\')"><div class="radio-dot"></div><div class="delivery-option-info"><h4>استلام ذاتي (مجاني)</h4><p>استلمي طلبك بنفسك بدون تكلفة إضافية</p></div></div>';
-            html += '<div class="delivery-option ' + (selectedDelivery === 'delivery' ? 'selected' : '') + '" onclick="selectDelivery(\'delivery\')"><div class="radio-dot"></div><div class="delivery-option-info"><h4>توصيل للعنوان</h4><p>توصيل لجميع مناطق الضفة، القدس، والداخل</p></div></div>';
-            html += '</div>';
-            if (selectedDelivery === 'delivery') {
-                html += '<div class="delivery-regions" style="margin-top:15px;">';
-                html += '<h4 style="margin-bottom:10px; font-size:0.95rem;">اختاري المنطقة:</h4>';
-                html += '<div class="region-options">';
-                html += '<div class="region-option ' + (selectedRegion === 'westbank' ? 'selected' : '') + '" onclick="selectRegion(\'westbank\')"><span>الضفة</span><span class="region-cost">₪20</span></div>';
-                html += '<div class="region-option ' + (selectedRegion === 'jerusalem' ? 'selected' : '') + '" onclick="selectRegion(\'jerusalem\')"><span>القدس</span><span class="region-cost">₪30</span></div>';
-                html += '<div class="region-option ' + (selectedRegion === 'inside' ? 'selected' : '') + '" onclick="selectRegion(\'inside\')"><span>الداخل</span><span class="region-cost">₪50</span></div>';
-                html += '</div></div>';
-            }
-            html += '</div>';
-            html += '<div class="checkout-card" style="margin-top:20px;">';
-            html += '<h3>معلومات التواصل</h3>';
-            html += '<div class="form-group"><label>الاسم</label><input type="text" id="custName" placeholder="اسمك الكريم" required></div>';
-            html += '<div class="form-group"><label>رقم الهاتف</label><input type="tel" id="custPhone" placeholder="05xxxxxxxx" pattern="[0-9]*" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')"></div>';
-            html += '<div class="form-group" id="addressGroup" style="' + (selectedDelivery === 'pickup' ? 'display:none' : '') + '"><label>العنوان (المدينة + تفاصيل)</label><textarea id="custAddress" rows="2" placeholder="المدينة، الحي، الشارع..."></textarea></div>';
-            html += '<div class="form-group"><label>ملاحظات إضافية (اختياري)</label><textarea id="custNotes" rows="2" placeholder="أي ملاحظات على الطلب..."></textarea></div>';
-            html += '</div>';
-            html += '</div>';
-            html += '<div><div class="checkout-card" style="position:sticky; top:80px;">';
-            html += '<h3>ملخص الطلب</h3>';
-            html += '<div class="summary-row"><span class="label">عدد المنتجات:</span><span>' + itemCount + ' قطعة</span></div>';
-            html += '<div class="summary-row"><span class="label">المجموع الفرعي:</span><span>' + getTotalDisplayText(subtotal, hasPending) + '</span></div>';
-            html += '<div class="summary-row"><span class="label">التوصيل:</span><span>' + getDeliveryCostLabel() + '</span></div>';
-            html += '<div class="summary-row total"><span>المجموع:</span><span>' + getTotalDisplayText(getTotal(), hasPending) + '</span></div>';
-            html += '<button type="button" class="btn-whatsapp-order" id="confirmOrderBtn" onclick="confirmOrder()">حفظ الطلب</button>';
-            html += '</div></div></div></div>';
-            container.innerHTML = html;
-            restoreFormValues(formData);
-        }
-
-        function getSubtotal() {
-            return cart.reduce(function (sum, item) {
-                if (item.type === 'custom_package') return sum;
-                var product = products.find(function (entry) { return entry.id === item.id; });
-                return product ? sum + getFinalPrice(product, item.sizeIdx, discounts).final * item.qty : sum;
-            }, 0);
-        }
-
-        function changeQty(productId, sizeIdx, delta) {
-            var item = cart.find(function (entry) { return entry.id === productId && entry.sizeIdx === sizeIdx; });
-            if (!item || item.type === 'custom_package') return;
-            item.qty += delta;
-            if (item.qty < 1) return removeItem(productId, sizeIdx);
-            saveCart();
-            render();
-        }
-
-        function removeItem(productId, sizeIdx) {
-            cart = cart.filter(function (entry) {
-                if (entry.type === 'custom_package') return entry.id !== String(productId);
-                return !(entry.id === productId && entry.sizeIdx === sizeIdx);
+        function normalizeLocations(list) {
+            var source = Array.isArray(list) ? list : [];
+            var results = [];
+            var hasDefault = false;
+            source.forEach(function (entry) {
+                var normalized = normalizeLocationEntry(entry);
+                if (!normalized.name || !normalized.address) return;
+                if (normalized.isDefault && !hasDefault) hasDefault = true;
+                else normalized.isDefault = false;
+                results.push(normalized);
             });
-            saveCart();
-            render();
+            if (results.length && !hasDefault) results[0].isDefault = true;
+            return results;
         }
-
-        function saveCart() {
-            localStorage.setItem('drenasshop_cart', JSON.stringify(normalizeCartItems(cart, products)));
+        function loadLocalSavedLocations() { try { return normalizeLocations(JSON.parse(localStorage.getItem('makka_saved_locations') || '[]')); } catch (error) { return []; } }
+        function saveLocalSavedLocations(list) { localStorage.setItem('makka_saved_locations', JSON.stringify(normalizeLocations(list))); }
+        function persistLastOrder(order) {
+            sessionStorage.setItem('makka_last_order', JSON.stringify(order));
+            localStorage.removeItem('makka_last_order');
+            localStorage.removeItem('drenasshop_last_order');
         }
-
-        function selectDelivery(method) {
-            var formData = getFormValues();
-            selectedDelivery = method;
-            if (method === 'pickup') selectedRegion = '';
-            localStorage.setItem('drenasshop_delivery_method', method);
-            render();
-            restoreFormValues(formData);
+        function rebuildProductIndex() {
+            var nextIndex = {};
+            var idx;
+            for (idx = 0; idx < products.length; idx += 1) nextIndex[String(products[idx].id)] = products[idx];
+            productIndex = nextIndex;
         }
-
-        function selectRegion(region) {
-            var formData = getFormValues();
-            selectedRegion = region;
-            render();
-            restoreFormValues(formData);
+        function getDefaultSavedLocationValue() {
+            var idx;
+            for (idx = 0; idx < savedLocations.length; idx += 1) if (savedLocations[idx].isDefault) return 'saved-' + idx;
+            return savedLocations.length ? 'saved-0' : 'manual';
         }
-
-        function getFormValues() {
-            return {
-                name: (document.getElementById('custName') || {}).value || '',
-                phone: (document.getElementById('custPhone') || {}).value || '',
-                address: (document.getElementById('custAddress') || {}).value || '',
-                notes: (document.getElementById('custNotes') || {}).value || ''
-            };
-        }
-
-        function restoreFormValues(data) {
-            var name = document.getElementById('custName');
-            var phone = document.getElementById('custPhone');
-            var address = document.getElementById('custAddress');
-            var notes = document.getElementById('custNotes');
-            if (name) name.value = data.name || '';
-            if (phone) phone.value = data.phone || '';
-            if (address) address.value = data.address || '';
-            if (notes) notes.value = data.notes || '';
-        }
-
-        function getDeliveryCost() {
-            return selectedDelivery === 'pickup' ? 0 : (DELIVERY_COSTS[selectedRegion] || 0);
-        }
-
-        function getDeliveryCostLabel() {
-            if (selectedDelivery === 'pickup') return 'مجاني (استلام ذاتي)';
-            if (!selectedRegion) return 'اختاري المنطقة';
-            return formatCurrency(getDeliveryCost()) + ' (' + DELIVERY_LABELS[selectedRegion] + ')';
-        }
-
-        function getTotal() {
-            return getSubtotal() + getDeliveryCost();
-        }
-
-        function buildOrder() {
-            var customerName = document.getElementById('custName').value.trim();
-            var customerPhone = document.getElementById('custPhone').value.trim();
-            var address = document.getElementById('custAddress') ? document.getElementById('custAddress').value.trim() : '';
-            var notes = document.getElementById('custNotes').value.trim();
-            var subtotal = getSubtotal();
-            var deliveryCost = getDeliveryCost();
-            var total = subtotal + deliveryCost;
-            var pricingPending = hasCustomPricingPending(cart);
-            var id = makeOrderId();
-            return {
-                id: id,
-                items: cart.map(function (item) {
-                    if (item.type === 'custom_package') {
-                        return {
-                            type: 'custom_package',
-                            packageId: item.id,
-                            name: getCustomPackageTitle(item),
-                            qty: 1,
-                            wrapperColor: item.wrapperColor,
-                            notes: item.notes,
-                            delivery: item.delivery,
-                            customerName: item.customerName,
-                            customerPhone: item.customerPhone,
-                            customerLocation: item.customerLocation,
-                            sets: item.sets,
-                            pricePending: true,
-                            lineTotal: null
-                        };
+        function getWholesaleUserDocument() {
+            if (!window.db || !wholesaleSession || !wholesaleSession.email) return Promise.resolve(null);
+            if (wholesaleSession.docId) {
+                return db.collection('wholesale_users').doc(String(wholesaleSession.docId)).get().then(function (docSnap) {
+                    if (docSnap.exists) {
+                        var data = docSnap.data() || {};
+                        data.id = docSnap.id;
+                        return data;
                     }
-                    var product = products.find(function (entry) { return entry.id === item.id; });
-                    if (!product) {
-                        return {
-                            productId: item.id,
-                            name: item.name || 'المنتج غير متوفر',
-                            brand: item.brand || '',
-                            image: item.image || '',
-                            sizeIdx: item.sizeIdx,
-                            sizeLabel: '',
-                            qty: item.qty,
-                            price: item.price || 0,
-                            lineTotal: (item.price || 0) * item.qty
-                        };
-                    }
-                    var sizeData = getSizeData(product, item.sizeIdx);
-                    var pricing = getFinalPrice(product, item.sizeIdx, discounts);
-                    return {
-                        productId: product.id,
-                        name: product.name,
-                        brand: product.brand,
-                        image: product.image || item.image || '',
-                        sizeIdx: item.sizeIdx,
-                        sizeLabel: getSizeLabel(sizeData),
-                        qty: item.qty,
-                        price: pricing.final,
-                        lineTotal: pricing.final * item.qty
-                    };
-                }),
-                customerName: customerName,
-                customerPhone: customerPhone,
-                address: address,
-                notes: notes,
-                delivery: selectedDelivery,
-                region: selectedDelivery === 'delivery' ? selectedRegion : 'pickup',
-                deliveryCost: deliveryCost,
-                subtotal: subtotal,
-                total: total,
-                totalDisplay: getTotalDisplayText(total, pricingPending),
-                pricingPending: pricingPending,
-                date: new Date().toISOString(),
-                status: 'new'
-            };
+                    return db.collection('wholesale_users').where('email', '==', normalizeWholesaleEmail(wholesaleSession.email)).limit(1).get().then(function (snapshot) {
+                        if (snapshot.empty) return null;
+                        var innerDoc = snapshot.docs[0];
+                        var innerData = innerDoc.data() || {};
+                        innerData.id = innerDoc.id;
+                        return innerData;
+                    });
+                });
+            }
+            return db.collection('wholesale_users').where('email', '==', normalizeWholesaleEmail(wholesaleSession.email)).limit(1).get().then(function (snapshot) {
+                if (snapshot.empty) return null;
+                var docSnap = snapshot.docs[0];
+                var data = docSnap.data() || {};
+                data.id = docSnap.id;
+                return data;
+            });
         }
-
-        function buildWhatsAppMessage(order) {
-            var itemsText = (order.items || []).map(function (item, index) {
-                if (item.type === 'custom_package') {
-                    var packageLines = (item.sets || []).map(function (setItem, setIndex) {
-                        return '   - تشكيلة ' + (setIndex + 1) + ': ' + getPackagingTypeLabel(setItem.chocolateType) + ' / ' + getPackagingFillingLabel(setItem.filling) + ' / الكمية ' + (parseInt(setItem.qty, 10) || 1);
-                    }).join('\n');
-                    var locationLine = item.delivery === 'delivery' && item.customerLocation ? '\n   الموقع: ' + item.customerLocation : '';
-                    var noteLine = item.notes ? '\n   ملاحظات: ' + item.notes : '';
-                    return (index + 1) + '. ' + item.name + '\n   لون التغليف: ' + getWrapperColorLabel(item.wrapperColor) + '\n' + packageLines + '\n   الاستلام: ' + (item.delivery === 'pickup' ? 'استلام من المصنع' : 'توصيل') + '\n   الاسم: ' + item.customerName + ' • الهاتف: ' + item.customerPhone + locationLine + noteLine + '\n   السعر: يحدد لاحقاً';
+        function loadCheckoutLocations() {
+            if (wholesaleMode) {
+                if (!window.db || !wholesaleSession || !wholesaleSession.email) {
+                    savedLocations = [];
+                    selectedSavedLocationValue = 'manual';
+                    return Promise.resolve([]);
                 }
-                return (index + 1) + '. ' + item.name + ' (' + item.sizeLabel + ')\n   السعر: ' + item.price + ' شيكل × ' + item.qty + ' = ' + item.lineTotal + ' شيكل';
-            }).join('\n');
-            var shippingText = order.delivery === 'pickup' ? 'مجاني (استلام ذاتي)' : formatCurrency(order.deliveryCost) + ' (' + DELIVERY_LABELS[order.region] + ')';
-            var deliveryLabel = order.delivery === 'pickup' ? 'استلام ذاتي' : 'توصيل إلى ' + DELIVERY_LABELS[order.region] + ': ' + order.address;
-            var msg = 'مرحبا، طلب جديد (' + order.id + '):\n';
-            msg += 'ـــــــــــــــــــــــــــ\n';
-            msg += 'الاسم: ' + order.customerName + '\n';
-            msg += 'الهاتف: ' + order.customerPhone + '\n';
-            msg += 'ـــــــــــــــــــــــــــ\n';
-            msg += 'المنتجات:\n\n' + itemsText + '\n';
-            msg += 'ـــــــــــــــــــــــــــ\n';
-            msg += 'المجموع المعروف: ' + formatCurrency(order.total) + '\n';
-            msg += 'الشحن: ' + shippingText + '\n';
-            msg += 'الإجمالي النهائي: ' + (order.totalDisplay || getTotalDisplayText(order.total, !!order.pricingPending)) + '\n';
-            msg += 'ـــــــــــــــــــــــــــ\n';
-            msg += 'الاستلام: ' + deliveryLabel + '\n';
-            if (order.notes) msg += 'ملاحظات: ' + order.notes + '\n';
-            return msg;
+                return getWholesaleUserDocument().then(function (user) {
+                    var fallback = user && user.location ? [{ name: 'العنوان الرئيسي', address: user.location, isDefault: true }] : [];
+                    savedLocations = normalizeLocations(user && user.locations ? user.locations : fallback);
+                    selectedSavedLocationValue = getDefaultSavedLocationValue();
+                    return savedLocations;
+                }).catch(function () {
+                    savedLocations = [];
+                    selectedSavedLocationValue = 'manual';
+                    return [];
+                });
+            }
+            savedLocations = loadLocalSavedLocations();
+            selectedSavedLocationValue = getDefaultSavedLocationValue();
+            return Promise.resolve(savedLocations);
         }
-
-        function showOrderSuccess(order) {
-            var container = document.getElementById('checkoutContent');
-            var whatsappUrl = buildWhatsAppUrl(siteSettings.whatsappNumber || '970595170026', buildWhatsAppMessage(order));
+        function renderSavedLocationsHtml(values) {
+            if (selectedDelivery !== 'delivery') return '';
             var html = '';
-            html += '<div class="checkout-success-card">';
-            html += '<h3>تم حفظ طلبك بنجاح</h3>';
-            html += '<div class="checkout-success-order-id">رقم الطلب: ' + order.id + '</div>';
-            html += '<p>يمكنك الآن إرسال الطلب عبر واتساب بشكل اختياري، أو العودة مباشرة إلى صفحة التأكيد والمتجر.</p>';
-            html += '<div class="checkout-success-actions">';
-            html += '<a href="' + whatsappUrl + '" target="_blank" rel="noopener" class="btn-success-whatsapp">إرسال عبر واتساب</a>';
-            html += '<button type="button" class="btn-success-back" onclick="window.location.href=\'confirmation.html\'">تم، عودة للمتجر</button>';
-            html += '</div></div>';
-            container.innerHTML = html;
-            setStatus('تم حفظ الطلب بنجاح. رقم الطلب: ' + order.id, 'success');
+            var selectedValue = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue();
+            if (savedLocations.length) {
+                html += '<div class="saved-location-group"><label for="savedLocationSelect">اختر عنواناً محفوظاً</label><select id="savedLocationSelect" class="saved-location-select" onchange="handleSavedLocationChange(this.value)"><option value="manual">اكتب عنواناً جديداً</option>' + savedLocations.map(function (location, idx) { return '<option value="saved-' + idx + '"' + (selectedValue === ('saved-' + idx) ? ' selected' : '') + '>' + escapeHtml(location.name) + ' — ' + escapeHtml(location.address) + '</option>'; }).join('') + '</select></div>';
+            } else if (wholesaleMode) html += '<div class="saved-location-note">لا توجد عناوين محفوظة في حسابك حالياً. يمكنك كتابة عنوان جديد لإتمام الطلب.</div>';
+            if (!wholesaleMode) {
+                html += '<div class="checkout-inline-grid"><input type="text" id="saveLocationName" class="checkout-inline-input" placeholder="اسم العنوان للحفظ لاحقاً" value="' + escapeHtml(values.saveLocationName || '') + '"><label class="checkout-checkbox-row"><input type="checkbox" id="saveLocationCheckbox"' + (values.saveLocationChecked ? ' checked' : '') + '>حفظ هذا العنوان لاستخدامه لاحقاً</label></div>';
+            }
+            return html;
         }
-
-        function confirmOrder() {
-            var customerName = document.getElementById('custName').value.trim();
-            var customerPhone = document.getElementById('custPhone').value.trim();
-            if (!customerName || !customerPhone) return alert('الرجاء إدخال الاسم ورقم الهاتف');
-            if (customerPhone.length < 9 || customerPhone.length > 14) return alert('رقم الهاتف غير صحيح');
-            if (selectedDelivery === 'delivery') {
-                if (!selectedRegion) return alert('الرجاء اختيار المنطقة');
-                var address = document.getElementById('custAddress').value.trim();
-                if (!address) return alert('الرجاء إدخال عنوان التوصيل');
+        function handleSavedLocationChange(value) {
+            var addressNode = document.getElementById('custAddress');
+            var idx = -1;
+            selectedSavedLocationValue = value || 'manual';
+            if (selectedSavedLocationValue.indexOf('saved-') === 0) idx = parseInt(selectedSavedLocationValue.split('-')[1], 10);
+            if (idx >= 0 && savedLocations[idx] && addressNode) addressNode.value = savedLocations[idx].address;
+        }
+        function saveRegularLocationIfNeeded(address) {
+            if (wholesaleMode || selectedDelivery !== 'delivery') return;
+            var checkbox = document.getElementById('saveLocationCheckbox');
+            var nameNode = document.getElementById('saveLocationName');
+            var safeAddress = sanitizeMultilineText(address || '', 300);
+            var locations;
+            var idx;
+            if (!checkbox || !checkbox.checked || !safeAddress) return;
+            locations = loadLocalSavedLocations();
+            for (idx = 0; idx < locations.length; idx += 1) if (String(locations[idx].address).trim() === safeAddress) return;
+            locations.push({
+                name: sanitizePlainText(nameNode && nameNode.value ? nameNode.value : 'عنوان محفوظ', 120) || 'عنوان محفوظ',
+                address: safeAddress,
+                isDefault: locations.length === 0
+            });
+            saveLocalSavedLocations(locations);
+            savedLocations = loadLocalSavedLocations();
+            selectedSavedLocationValue = getDefaultSavedLocationValue();
+        }
+        function findProductById(productId) { return productIndex[String(productId)] || null; }
+        function getAvailableProductQuantity(product) { return product && typeof product.quantity === 'number' ? product.quantity : 9999; }
+        function getCartProductTotal(productId) {
+            return cart.reduce(function (sum, item) {
+                return String(item.id) === String(productId) ? sum + Math.max(1, parseInt(item.qty, 10) || 1) : sum;
+            }, 0);
+        }
+        function canUseProductQuantity(product, requestedQty, excludeQty) {
+            var available = getAvailableProductQuantity(product);
+            var totalInCart = getCartProductTotal(product.id) - Math.max(0, parseInt(excludeQty, 10) || 0);
+            if (totalInCart + requestedQty > available) {
+                alert('الكمية المطلوبة غير متوفرة. المتوفر: ' + available + ' قطعة');
+                return false;
             }
-
-            var button = document.getElementById('confirmOrderBtn');
-            var originalText = button.textContent;
-            button.disabled = true;
-            button.textContent = 'جاري حفظ الطلب...';
-            setStatus('جاري حفظ الطلب...', '');
-
-            var order = buildOrder();
-            if (!window.db) {
-                alert('تعذر الاتصال بقاعدة البيانات حالياً، حاولي مرة أخرى.');
-                button.disabled = false;
-                button.textContent = originalText;
-                setStatus('');
-                return;
+            return true;
+        }
+        function validateCheckoutQuantities() {
+            var idx;
+            for (idx = 0; idx < cart.length; idx += 1) {
+                var item = cart[idx];
+                var product = findProductById(item.id);
+                if (!product) continue;
+                if (product.quantity === 0 || product.status === 'soldout') {
+                    alert('أحد المنتجات في السلة لم يعد متوفراً حالياً.');
+                    return false;
+                }
+                if (!canUseProductQuantity(product, Math.max(1, parseInt(item.qty, 10) || 1), Math.max(1, parseInt(item.qty, 10) || 1))) return false;
             }
-
-            db.collection('orders').doc(order.id).set(order).then(function () {
-                localStorage.setItem('drenasshop_last_order', JSON.stringify(order));
-                localStorage.setItem('drenasshop_cart', '[]');
-                cart = [];
-                showOrderSuccess(order);
-            }).catch(function (error) {
-                console.error(error);
-                alert('تعذر حفظ الطلب حالياً، حاولي مرة أخرى.');
-                button.disabled = false;
-                button.textContent = originalText;
-                setStatus('');
+            return true;
+        }
+        function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(normalizeCartItems(cart, products))); localStorage.removeItem(LEGACY_CART_KEY); }
+        function setStatus(message, type) { var node = document.getElementById('checkoutStatus'); if (!node) return; node.textContent = message || ''; node.className = 'checkout-status' + (type ? ' ' + type : ''); node.style.display = message ? 'block' : 'none'; }
+        function initializeCheckout() {
+            saveCart();
+            rebuildProductIndex();
+            setStatus('جاري تحميل بيانات الطلب...', '');
+            loadCheckoutLocations().then(function () { renderCheckout(); setStatus(''); });
+            if (!window.db) return;
+            Promise.all([
+                db.collection('products').get(),
+                db.collection('discounts').get(),
+                db.collection('settings').doc('config').get()
+            ]).then(function (results) {
+                var productSnapshot = results[0];
+                var discountSnapshot = results[1];
+                var settingsSnapshot = results[2];
+                if (!productSnapshot.empty) products = productSnapshot.docs.map(function (docSnap) { var data = docSnap.data() || {}; data.id = docSnap.id; return normalizeProduct(data); });
+                discounts = discountSnapshot.docs.map(function (docSnap) { var data = docSnap.data() || {}; data.id = docSnap.id; return normalizeDiscount(data); });
+                siteSettings = normalizeSettings(settingsSnapshot.exists ? settingsSnapshot.data() : DEFAULT_SITE_SETTINGS);
+                rebuildProductIndex();
+                cart = normalizeCartItems(loadStoredCart(), products);
+                saveCart();
+                renderCheckout();
+            }).catch(function () {
+                renderCheckout();
             });
         }
+        function getItemsCount() { return cart.reduce(function (sum, item) { return sum + Math.max(1, parseInt(item.qty, 10) || 1); }, 0); }
+        function getSubtotal() { return cart.reduce(function (sum, item) { var product = findProductById(item.id); return product ? sum + (getFinalPrice(product, item.sizeIdx, discounts).final * item.qty) : sum; }, 0); }
+        function getDeliveryCost() { return wholesaleMode || selectedDelivery === 'pickup' ? 0 : (DELIVERY_COSTS[selectedRegion] || 0); }
+        function getTotal() { return getSubtotal() + getDeliveryCost(); }
+        function getTotalLabel() { return wholesaleMode ? 'السعر حسب الاتفاق' : formatCurrency(getTotal()); }
+        function getDeliveryLabel() { if (selectedDelivery === 'pickup') return 'استلام ذاتي'; return wholesaleMode ? 'يحدد مع مندوب المبيعات' : formatCurrency(getDeliveryCost()) + ' (' + DELIVERY_LABELS[selectedRegion] + ')'; }
+        function changeQty(productId, sizeIdx, delta) { var idx; for (idx = 0; idx < cart.length; idx += 1) if (String(cart[idx].id) === String(productId) && parseInt(cart[idx].sizeIdx, 10) === parseInt(sizeIdx, 10)) { var product = findProductById(productId); if (product && delta > 0 && !canUseProductQuantity(product, cart[idx].qty + delta, cart[idx].qty)) return; cart[idx].qty += delta; if (cart[idx].qty < 1) { removeItem(productId, sizeIdx); return; } saveCart(); renderCheckout(); return; } }
+        function removeItem(productId, sizeIdx) { cart = cart.filter(function (item) { return !(String(item.id) === String(productId) && parseInt(item.sizeIdx, 10) === parseInt(sizeIdx, 10)); }); saveCart(); renderCheckout(); }
+        function selectDelivery(method) { var values = getFormValues(); selectedDelivery = method; localStorage.setItem(DELIVERY_KEY, method); if (method === 'pickup') selectedRegion = 'westbank'; renderCheckout(); restoreFormValues(values); }
+        function selectRegion(region) { var values = getFormValues(); selectedRegion = region; renderCheckout(); restoreFormValues(values); }
+        function getFormValues() { return { name: (document.getElementById('custName') || {}).value || '', phone: (document.getElementById('custPhone') || {}).value || '', address: (document.getElementById('custAddress') || {}).value || '', notes: (document.getElementById('custNotes') || {}).value || '', savedLocationValue: (document.getElementById('savedLocationSelect') || {}).value || selectedSavedLocationValue || 'manual', saveLocationName: (document.getElementById('saveLocationName') || {}).value || '', saveLocationChecked: !!((document.getElementById('saveLocationCheckbox') || {}).checked) }; }
+        function restoreFormValues(values) { var name = document.getElementById('custName'); var phone = document.getElementById('custPhone'); var address = document.getElementById('custAddress'); var notes = document.getElementById('custNotes'); var savedLocationSelect = document.getElementById('savedLocationSelect'); var saveLocationName = document.getElementById('saveLocationName'); var saveLocationCheckbox = document.getElementById('saveLocationCheckbox'); if (name) name.value = values.name || ''; if (phone) phone.value = values.phone || ''; if (address) address.value = values.address || ''; if (notes) notes.value = values.notes || ''; if (savedLocationSelect) savedLocationSelect.value = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue(); if (saveLocationName) saveLocationName.value = values.saveLocationName || ''; if (saveLocationCheckbox) saveLocationCheckbox.checked = !!values.saveLocationChecked; selectedSavedLocationValue = values.savedLocationValue || selectedSavedLocationValue || getDefaultSavedLocationValue(); if (address && !address.value && selectedSavedLocationValue.indexOf('saved-') === 0) handleSavedLocationChange(selectedSavedLocationValue); }
+        function setCheckoutFieldError(fieldId, message) {
+            var field = document.getElementById(fieldId);
+            var errorNode = document.getElementById(fieldId + 'Error');
+            checkoutFieldErrors[fieldId] = message || '';
+            if (field && field.className.indexOf('invalid') < 0) field.className += ' invalid';
+            if (errorNode) errorNode.textContent = message || '';
+        }
+        function clearCheckoutFieldError(fieldId) {
+            var field = document.getElementById(fieldId);
+            var errorNode = document.getElementById(fieldId + 'Error');
+            checkoutFieldErrors[fieldId] = '';
+            if (field) field.className = field.className.replace(/\s?invalid/g, '');
+            if (errorNode) errorNode.textContent = '';
+        }
+        function bindCheckoutValidation() {
+            ['custName', 'custPhone', 'custAddress'].forEach(function (fieldId) {
+                var field = document.getElementById(fieldId);
+                if (!field) return;
+                field.oninput = function () {
+                    if (fieldId === 'custAddress' && selectedDelivery === 'pickup') return;
+                    clearCheckoutFieldError(fieldId);
+                };
+            });
+        }
+        function renderCheckout() {
+            var container = document.getElementById('checkoutContent'); if (!container) return;
+            if (!cart.length) { container.innerHTML = '<div class="empty-checkout"><span>🛒</span><p>السلة فارغة حالياً.</p><a href="index.html" class="btn btn-primary wood-sign-btn">العودة للتسوق</a></div>'; return; }
+            var values = getFormValues();
+            var itemsHtml = cart.map(function (item) { var product = findProductById(item.id); if (!product) return ''; var sizeData = getSizeData(product, item.sizeIdx); var lineTotal = getFinalPrice(product, item.sizeIdx, discounts).final * item.qty; return '<div class="checkout-item"><img src="' + escapeHtml(product.image || FALLBACK_IMAGE) + '" alt="' + escapeHtml(product.name) + '" loading="lazy" onerror="this.src=\'' + FALLBACK_IMAGE + '\'"><div class="checkout-item-info"><h4>' + escapeHtml(product.name) + '</h4><span class="checkout-item-meta">' + escapeHtml(product.category) + '</span><span class="checkout-item-meta">' + escapeHtml(getSizeLabel(sizeData)) + ' • الكمية ' + item.qty + '</span></div><div><div class="checkout-item-price">' + (wholesaleMode ? 'السعر حسب الاتفاق' : formatCurrency(lineTotal)) + '</div><div class="cart-item-qty" style="justify-content:center;"><button type="button" data-product-id="' + escapeHtml(product.id) + '" data-size-idx="' + item.sizeIdx + '" onclick="changeQty(this.getAttribute(\'data-product-id\'), this.getAttribute(\'data-size-idx\'), -1)">−</button><span>' + item.qty + '</span><button type="button" data-product-id="' + escapeHtml(product.id) + '" data-size-idx="' + item.sizeIdx + '" onclick="changeQty(this.getAttribute(\'data-product-id\'), this.getAttribute(\'data-size-idx\'), 1)">+</button></div><button type="button" class="cart-item-remove" style="margin-top:8px;" data-product-id="' + escapeHtml(product.id) + '" data-size-idx="' + item.sizeIdx + '" onclick="removeItem(this.getAttribute(\'data-product-id\'), this.getAttribute(\'data-size-idx\'))">✕</button></div></div>'; }).join('');
+            var html = '<div class="checkout-grid"><div><div class="checkout-card"><h3>المنتجات (' + getItemsCount() + ' قطعة)</h3><div class="checkout-items">' + itemsHtml + '</div></div>';
+            html += '<div class="checkout-card" style="margin-top:18px;"><h3>طريقة الاستلام</h3><div class="delivery-options"><div class="delivery-option ' + (selectedDelivery === 'pickup' ? 'selected' : '') + '" onclick="selectDelivery(\'pickup\')"><strong>استلام ذاتي</strong><p>من المعرض أو المخزن حسب التنسيق.</p></div><div class="delivery-option ' + (selectedDelivery === 'delivery' ? 'selected' : '') + '" onclick="selectDelivery(\'delivery\')"><strong>توصيل</strong><p>' + (wholesaleMode ? 'سيتم تنسيق تكلفة التوصيل عند تأكيد طلب الجملة.' : 'اختر المنطقة لحساب تكلفة التوصيل.') + '</p></div></div>';
+            if (selectedDelivery === 'delivery') html += '<div class="region-options" style="margin-top:14px;"><div class="region-option ' + (selectedRegion === 'westbank' ? 'selected' : '') + '" onclick="selectRegion(\'westbank\')">الضفة' + (wholesaleMode ? '' : '<br><small>₪20</small>') + '</div><div class="region-option ' + (selectedRegion === 'jerusalem' ? 'selected' : '') + '" onclick="selectRegion(\'jerusalem\')">القدس' + (wholesaleMode ? '' : '<br><small>₪30</small>') + '</div><div class="region-option ' + (selectedRegion === 'inside' ? 'selected' : '') + '" onclick="selectRegion(\'inside\')">الداخل' + (wholesaleMode ? '' : '<br><small>₪50</small>') + '</div></div>';
+            html += '</div><div class="checkout-card" style="margin-top:18px;"><h3>معلومات التواصل</h3><p class="checkout-required-note">الحقول المعلّمة بعلامة * مطلوبة لإتمام الطلب.</p><div class="checkout-form-grid"><div class="checkout-field required"><label for="custName">الاسم الكامل</label><input type="text" id="custName" class="checkout-input" placeholder="الاسم الكامل" required><div class="checkout-field-error" id="custNameError"></div></div><div class="checkout-field required"><label for="custPhone">رقم الهاتف</label><input type="tel" id="custPhone" class="checkout-input" placeholder="05xxxxxxxx" inputmode="numeric" required><div class="checkout-field-error" id="custPhoneError"></div></div>' + renderSavedLocationsHtml(values) + '<div class="checkout-field required" ' + (selectedDelivery === 'pickup' ? 'style="display:none;"' : '') + '><label for="custAddress">' + (wholesaleMode ? 'عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '</label><textarea id="custAddress" class="checkout-textarea" placeholder="' + (wholesaleMode ? 'اكتب عنوان الورشة أو موقع التنزيل' : 'العنوان أو موقع الورشة') + '" ' + (selectedDelivery === 'pickup' ? 'style="display:none;"' : '') + '></textarea><div class="checkout-field-error" id="custAddressError"></div></div><div class="checkout-field"><label for="custNotes">ملاحظات إضافية</label><textarea id="custNotes" class="checkout-textarea" placeholder="ملاحظات إضافية (اختياري)"></textarea></div>' + (wholesaleMode ? '<div class="checkout-note-box">وضع الجملة مفعل: لن يتم عرض الأسعار، وسيتم إرسال الطلب عبر واتساب فقط بعنوان <strong>طلب جملة</strong>.</div>' : '') + '</div></div></div>';
+            html += '<div><div class="checkout-card"><h3>ملخص الطلب</h3><div class="checkout-summary"><div class="checkout-summary-row"><span>عدد المنتجات</span><strong>' + getItemsCount() + ' قطعة</strong></div><div class="checkout-summary-row"><span>المجموع الفرعي</span><strong>' + (wholesaleMode ? 'السعر حسب الاتفاق' : formatCurrency(getSubtotal())) + '</strong></div><div class="checkout-summary-row"><span>التوصيل</span><strong>' + getDeliveryLabel() + '</strong></div><div class="checkout-summary-row total"><span>الإجمالي</span><strong>' + getTotalLabel() + '</strong></div></div><button type="button" class="checkout-submit" id="confirmOrderBtn" onclick="confirmOrder()">' + (wholesaleMode ? 'إرسال طلب الجملة عبر واتساب' : 'حفظ الطلب وإرساله') + '</button></div></div></div>';
+            container.innerHTML = html; restoreFormValues(values); bindCheckoutValidation();
+        }
+        function buildOrder() {
+            var name = sanitizePlainText((document.getElementById('custName').value || '').trim(), 120);
+            var phone = sanitizePhoneNumber((document.getElementById('custPhone').value || '').trim());
+            var address = sanitizeMultilineText((document.getElementById('custAddress') ? document.getElementById('custAddress').value : '').trim(), 400);
+            var notes = sanitizeMultilineText((document.getElementById('custNotes').value || '').trim(), 500);
+            return { id: makeOrderId(), wholesale: wholesaleMode, wholesaleEmail: wholesaleMode && wholesaleSession ? normalizeWholesaleEmail(wholesaleSession.email) : '', wholesaleUserId: wholesaleMode && wholesaleSession ? String(wholesaleSession.docId || '') : '', customerName: name, customerPhone: phone, address: address, notes: notes, delivery: selectedDelivery, region: selectedDelivery === 'pickup' ? 'pickup' : selectedRegion, deliveryCost: wholesaleMode ? 0 : getDeliveryCost(), subtotal: wholesaleMode ? 0 : getSubtotal(), total: wholesaleMode ? 0 : getTotal(), totalDisplay: wholesaleMode ? 'السعر حسب الاتفاق' : formatCurrency(getTotal()), savedLocationName: sanitizePlainText((document.getElementById('saveLocationName') || {}).value || '', 120), date: new Date().toISOString(), status: 'new', items: cart.map(function (item) { var product = findProductById(item.id); var sizeData = product ? getSizeData(product, item.sizeIdx) : { size: '-', unit: '' }; var finalPrice = product ? getFinalPrice(product, item.sizeIdx, discounts).final : 0; return { productId: item.id, name: product ? product.name : 'منتج', brand: product ? product.brand : '', category: product ? product.category : '', image: product ? product.image : '', sizeIdx: item.sizeIdx, sizeLabel: getSizeLabel(sizeData), qty: item.qty, price: wholesaleMode ? null : finalPrice, lineTotal: wholesaleMode ? null : finalPrice * item.qty }; }) };
+        }
+        function buildWhatsAppMessage(order) {
+            var header = order.wholesale ? 'طلب جملة:' : 'طلب جديد:';
+            var itemsText = (order.items || []).map(function (item, index) { var line = (index + 1) + '. ' + item.name + ' - ' + item.sizeLabel + ' - الكمية ' + item.qty; if (!order.wholesale) line += ' - ' + item.lineTotal + ' شيكل'; return line; }).join('\n');
+            var message = header + '\nرقم الطلب: ' + order.id + '\nالاسم: ' + order.customerName + '\nالهاتف: ' + order.customerPhone + '\nالاستلام: ' + (order.delivery === 'pickup' ? 'استلام ذاتي' : 'توصيل إلى ' + DELIVERY_LABELS[order.region]) + '\n';
+            if (order.address && order.delivery !== 'pickup') message += 'العنوان: ' + order.address + '\n';
+            message += 'المنتجات:\n' + itemsText + '\n';
+            if (!order.wholesale) message += 'الإجمالي: ' + order.totalDisplay + '\n';
+            if (order.notes) message += 'ملاحظات: ' + order.notes + '\n';
+            return message;
+        }
+        function showOrderSuccess(order) {
+            var whatsappUrl = buildWhatsAppUrl(siteSettings.whatsappNumber, buildWhatsAppMessage(order));
+            setStatus('تم حفظ الطلب بنجاح. رقم الطلب: ' + order.id, 'success');
+            persistLastOrder(order);
+            if (order.wholesale) window.location.href = whatsappUrl;
+            else window.location.href = 'confirmation.html';
+        }
+        function confirmOrder() {
+            var name = sanitizePlainText((document.getElementById('custName').value || '').trim(), 120);
+            var phone = sanitizePhoneNumber((document.getElementById('custPhone').value || '').trim());
+            var address = sanitizeMultilineText((document.getElementById('custAddress') ? document.getElementById('custAddress').value : '').trim(), 400);
+            clearCheckoutFieldError('custName');
+            clearCheckoutFieldError('custPhone');
+            clearCheckoutFieldError('custAddress');
+            if (!name) { setCheckoutFieldError('custName', 'أدخل الاسم الكامل لإتمام الطلب.'); return; }
+            if (!phone) { setCheckoutFieldError('custPhone', 'أدخل رقم الهاتف حتى نتواصل معك.'); return; }
+            if (!/^\+?\d{9,15}$/.test(phone)) { setCheckoutFieldError('custPhone', 'أدخل رقم هاتف صالحاً بصيغة صحيحة.'); return; }
+            if (selectedDelivery === 'delivery' && !address) { setCheckoutFieldError('custAddress', 'أدخل عنوان التوصيل قبل حفظ الطلب.'); return; }
+            if (!validateCheckoutQuantities()) return;
+            saveRegularLocationIfNeeded(address);
+            var order = buildOrder(); var button = document.getElementById('confirmOrderBtn'); if (button) { button.disabled = true; button.textContent = 'جاري حفظ الطلب...'; }
+            setStatus('جاري التحقق من المخزون...', '');
+            // Server-side stock validation
+            var stockItems = cart.map(function(item) { return { productId: item.id, qty: item.qty }; });
+            fetch('https://makka-api.alsadiayham.workers.dev/api/validate-stock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: stockItems })
+            }).then(function(res) { return res.json(); }).then(function(data) {
+                if (data.valid === false && data.errors && data.errors.length) {
+                    var msgs = data.errors.map(function(e) { return e.productId + ': متوفر ' + e.available + ' فقط'; });
+                    alert('بعض المنتجات غير متوفرة بالكمية المطلوبة:\n' + msgs.join('\n'));
+                    if (button) { button.disabled = false; button.textContent = wholesaleMode ? 'إرسال طلب الجملة عبر واتساب' : 'حفظ الطلب وإرساله'; }
+                    setStatus('', '');
+                    return;
+                }
+                saveOrderToFirestore(order, button);
+            }).catch(function() {
+                // If API unreachable, proceed with local validation only
+                saveOrderToFirestore(order, button);
+            });
+        }
+        function saveOrderToFirestore(order, button) {
+            setStatus('جاري حفظ الطلب...', '');
+            if (!window.db) { localStorage.setItem(CART_KEY, '[]'); cart = []; showOrderSuccess(order); return; }
+            db.collection('orders').doc(order.id).set(order).then(function () { localStorage.setItem(CART_KEY, '[]'); cart = []; showOrderSuccess(order); }).catch(function (error) { reportClientError(error); setStatus('', ''); alert('تعذر حفظ الطلب حالياً، حاول مرة أخرى.'); if (button) { button.disabled = false; button.textContent = wholesaleMode ? 'إرسال طلب الجملة عبر واتساب' : 'حفظ الطلب وإرساله'; } });
+        }
+        document.addEventListener('DOMContentLoaded', initializeCheckout);
     </script>
 </body>
 </html>

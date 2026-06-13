@@ -1,55 +1,134 @@
 var DEFAULT_PRODUCTS = [];
-
 var DEFAULT_DISCOUNTS = [];
-
 var DEFAULT_SITE_SETTINGS = {
-    whatsappNumber: '970595170026',
-    heroSubtitle: 'منتجات عناية بالبشرة والجسم والشعر بأعلى جودة',
-    aboutText: 'إيناس شوب - مصنع شوكولاتة فلسطيني متخصص بصناعة أجود أنواع الشوكولاتة يدوياً.\nنقدم تغليف مخصص وتشكيلات فريدة لكل المناسبات.\nاختاري الألوان والحشوات والأنواع اللي بتحبيها وخلينا نجهزلك أحلى علبة.',
-    instagramLink: 'https://www.instagram.com/dr_enas_shop/',
-    tiktokLink: ''
+    whatsappNumber: '972569236758',
+    heroSubtitle: 'كل ما يحتاجه النجار في مكان واحد',
+    aboutText: 'شركة مكة لبيع إكسسوارات ولوازم النجارين\nنوفر لكم فصاليات وسحابات ولوازم أبواب وايدين أبواب وأقمشة وبراغي بأعلى جودة مع خدمة مميزة للجملة والمفرق.',
+    instagramLink: 'https://www.facebook.com/people/%D8%B4%D8%B1%D9%83%D8%A9-%D9%85%D9%83%D8%A9-%D9%84%D8%A8%D9%8A%D8%B9-%D8%A5%D9%83%D8%B3%D8%B3%D9%88%D8%A7%D8%B1%D8%A7%D8%AA-%D9%88%D9%84%D9%88%D8%A7%D8%B2%D9%85-%D8%A7%D9%84%D9%86%D8%AC%D8%A7%D8%B1%D9%8A%D9%86/61576542398498/',
+    tiktokLink: '',
+    wholesalePrices: {}
 };
 
-var BRANDS_DATA = [{ name: 'AXIS-Y', logo: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=100&h=100&fit=crop' }, { name: 'Beauty of Joseon', logo: 'https://images.unsplash.com/photo-1570194065650-d99fb4ee7cde?w=100&h=100&fit=crop' }, { name: 'I LOVE', logo: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop' }, { name: 'Neat', logo: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=100&h=100&fit=crop' }, { name: 'VT Cosmetics', logo: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=100&h=100&fit=crop' }, { name: 'Hoppa', logo: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=100&h=100&fit=crop' }, { name: 'SESDERMA', logo: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop' }, { name: 'BioBalance', logo: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100&h=100&fit=crop' }];
+function normalizeWholesalePrices(map) {
+    var source = map || {};
+    var normalized = {};
+    var key;
+    for (key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+            normalized[key] = Number(source[key]) || 0;
+        }
+    }
+    return normalized;
+}
 
-function normalizeSizeEntry(entry) {
-    if (!entry) return { size: '-', unit: 'cm', price: 0 };
-    var unit = entry.unit || 'cm';
+function normalizeLegacySizeText(entry) {
+    var text = String(entry || '').trim();
+    var units = ['انش', 'سم', 'متر', 'مم', 'حبة', 'علبة', 'inch', 'cm', 'm', 'mm', 'piece', 'box'];
+    var idx;
+    for (idx = 0; idx < units.length; idx += 1) {
+        if (text.indexOf(units[idx]) >= 0) {
+            return {
+                size: text.replace(units[idx], '').trim() || (units[idx] === 'متر' ? '1' : '-'),
+                unit: units[idx],
+                price: 0
+            };
+        }
+    }
+    return { size: text || '-', unit: '', price: 0 };
+}
+
+function normalizeSizeEntry(entry, fallbackPrice, index) {
+    if (!entry) return { size: '-', unit: '', price: Math.max(0, Number(fallbackPrice) || 0) };
+    if (typeof entry === 'string') {
+        var parsed = normalizeLegacySizeText(entry);
+        parsed.price = Math.max(0, Number(fallbackPrice) || 0) + ((index || 0) * Math.max(1, Math.round((Number(fallbackPrice) || 10) * 0.15)));
+        return parsed;
+    }
     return {
-        size: String(entry.size || '-').trim() || '-',
-        unit: unit,
-        price: Number(entry.price) || 0
+        size: sanitizePlainText(entry.size == null ? '-' : entry.size, 80) || '-',
+        unit: String(entry.unit || '').trim(),
+        price: Math.max(0, Number(entry.price != null ? entry.price : fallbackPrice) || 0)
     };
 }
 
-function normalizeProduct(product) {
-    var sizes = Array.isArray(product && product.sizes) && product.sizes.length
-        ? product.sizes.map(normalizeSizeEntry)
-        : [normalizeSizeEntry({ size: product && product.size, unit: product && product.unit, price: product && product.price })];
+function sanitizePlainText(value, maxLength) {
+    var text = String(value == null ? '' : value)
+        .replace(/[\u0000-\u001f\u007f]/g, ' ')
+        .replace(/[<>]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (maxLength && text.length > maxLength) return text.slice(0, maxLength);
+    return text;
+}
 
+function sanitizeMultilineText(value, maxLength) {
+    var text = String(value == null ? '' : value)
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ')
+        .replace(/[<>]/g, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    if (maxLength && text.length > maxLength) return text.slice(0, maxLength);
+    return text;
+}
+
+function sanitizeUrl(value) {
+    var url = String(value == null ? '' : value).trim();
+    if (!url) return '';
+    if (/^data:image\//i.test(url)) return url;
+    if (!/^https?:\/\//i.test(url)) return '';
+    if (/^javascript:/i.test(url)) return '';
+    return url;
+}
+
+function sanitizePhoneNumber(value) {
+    return String(value == null ? '' : value).replace(/[^\d+]/g, '').trim();
+}
+
+function normalizeProduct(product) {
+    var source = product || {};
+    var sizes = [];
+    var idx;
+    var quantity = null;
+    if (Array.isArray(source.sizes) && source.sizes.length) {
+        for (idx = 0; idx < source.sizes.length; idx += 1) sizes.push(normalizeSizeEntry(source.sizes[idx], source.price || 0, idx));
+    } else {
+        sizes.push(normalizeSizeEntry({ size: source.size || '-', unit: source.unit || '', price: source.price || 0 }, source.price || 0, 0));
+    }
+    if (source.quantity !== undefined && source.quantity !== null && String(source.quantity).trim() !== '') {
+        quantity = Math.max(0, parseInt(source.quantity, 10) || 0);
+    }
     return {
-        id: (product && product.id) || String(Date.now()),
-        name: (product && product.name) || '',
-        brand: (product && product.brand) || '',
-        category: (product && product.category) || '',
-        sizes: sizes.filter(function (size) { return size.size && size.price >= 0; }),
-        discount: Number(product && product.discount) || 0,
-        image: (product && product.image) || '',
-        status: (product && product.status) || 'normal'
+        id: String(source.id || ''),
+        name: sanitizePlainText(source.name || '', 160),
+        brand: sanitizePlainText(source.brand || '', 120),
+        category: sanitizePlainText(source.category || '', 120),
+        sizes: sizes,
+        discount: Number(source.discount) || 0,
+        image: sanitizeUrl(source.image || ''),
+        status: String(source.status || 'normal'),
+        description: sanitizeMultilineText(source.description || '', 800),
+        createdAt: source.createdAt || '',
+        order: Number(source.order) || 0,
+        quantity: quantity
     };
 }
 
 function normalizeProducts(list) {
-    return (Array.isArray(list) ? list : []).map(normalizeProduct).sort(function (a, b) { return a.id - b.id; });
+    var normalized = Array.isArray(list) ? list.map(normalizeProduct) : [];
+    normalized.sort(function (a, b) {
+        if ((a.order || 0) !== (b.order || 0)) return (a.order || 0) - (b.order || 0);
+        return String(a.id || '').localeCompare(String(b.id || ''));
+    });
+    return normalized;
 }
 
 function normalizeDiscount(discount) {
     var values = [];
-    if (discount && discount.values && Array.isArray(discount.values)) {
-        values = discount.values;
-    } else if (discount && discount.value) {
-        values = String(discount.value).split(',').map(function (v) { return v.trim(); }).filter(Boolean);
-    }
+    if (discount && Array.isArray(discount.values)) values = discount.values;
+    else if (discount && discount.value) values = String(discount.value).split(',').map(function (value) { return value.trim(); }).filter(function (value) { return !!value; });
     return {
         id: String(discount && discount.id ? discount.id : Date.now()),
         type: ['brand', 'category', 'manual', 'all'].indexOf(discount && discount.type) >= 0 ? discount.type : 'manual',
@@ -68,8 +147,8 @@ function normalizeDiscounts(list) {
 function extractWhatsappNumber(input) {
     var raw = String(input || '').trim();
     if (!raw) return DEFAULT_SITE_SETTINGS.whatsappNumber;
-    var fromLink = raw.indexOf('wa.me/') >= 0 ? raw.split('wa.me/')[1] : raw;
-    return fromLink.replace(/[^\d]/g, '');
+    if (raw.indexOf('wa.me/') >= 0) raw = raw.split('wa.me/')[1];
+    return raw.replace(/[^\d]/g, '');
 }
 
 function buildWhatsAppUrl(number, message) {
@@ -82,31 +161,39 @@ function normalizeSettings(settings) {
     var source = settings || {};
     return {
         whatsappNumber: extractWhatsappNumber(source.whatsappNumber || source.whatsappLink || DEFAULT_SITE_SETTINGS.whatsappNumber),
-        heroSubtitle: String(source.heroSubtitle || DEFAULT_SITE_SETTINGS.heroSubtitle),
-        aboutText: String(source.aboutText || DEFAULT_SITE_SETTINGS.aboutText),
-        instagramLink: String(source.instagramLink || DEFAULT_SITE_SETTINGS.instagramLink),
-        tiktokLink: String(source.tiktokLink || DEFAULT_SITE_SETTINGS.tiktokLink)
+        heroSubtitle: sanitizePlainText(source.heroSubtitle || DEFAULT_SITE_SETTINGS.heroSubtitle, 240),
+        aboutText: sanitizeMultilineText(source.aboutText || DEFAULT_SITE_SETTINGS.aboutText, 1500),
+        instagramLink: sanitizeUrl(source.instagramLink || DEFAULT_SITE_SETTINGS.instagramLink),
+        tiktokLink: sanitizeUrl(source.tiktokLink || DEFAULT_SITE_SETTINGS.tiktokLink),
+        wholesalePrices: normalizeWholesalePrices(source.wholesalePrices || DEFAULT_SITE_SETTINGS.wholesalePrices)
     };
 }
 
 function getSizeData(product, sizeIdx) {
-    if (!product || !Array.isArray(product.sizes) || !product.sizes.length) return { size: '-', unit: '', price: product ? product.price || 0 : 0 };
-    var safeIndex = Math.max(0, Math.min(Number(sizeIdx) || 0, product.sizes.length - 1));
-    return product.sizes[safeIndex];
+    var sizes = product && Array.isArray(product.sizes) ? product.sizes : [];
+    if (!sizes.length) return { size: '-', unit: '', price: Number(product && product.price) || 0 };
+    var safeIndex = Math.max(0, Math.min(Number(sizeIdx) || 0, sizes.length - 1));
+    return sizes[safeIndex];
 }
 
 function getUnitLabel(unit) {
-    if (unit === 'g') return 'غرام';
-    if (unit === 'cm') return 'سم';
-    if (unit === 'ml') return 'مل';
-    if (unit === 'قطعة') return '';
+    if (unit === 'انش' || unit === 'inch') return 'انش';
+    if (unit === 'سم' || unit === 'cm') return 'سم';
+    if (unit === 'متر' || unit === 'm') return 'متر';
+    if (unit === 'مم' || unit === 'mm') return 'مم';
+    if (unit === 'حبة' || unit === 'piece' || unit === 'قطعة') return 'حبة';
+    if (unit === 'علبة' || unit === 'box') return 'علبة';
     return '';
 }
 
 function getSizeLabel(sizeData) {
-    var label = getUnitLabel(sizeData.unit);
-    if (!label) return String(sizeData.size);
-    return String(sizeData.size) + ' ' + label;
+    var entry = sizeData || { size: '-', unit: '' };
+    var sizeValue = String(entry.size == null ? '-' : entry.size).trim();
+    var label = getUnitLabel(entry.unit);
+    if (!label) return sizeValue === '-' ? 'سعر ثابت' : sizeValue;
+    if (label === 'حبة' && (sizeValue === '1' || sizeValue === '-' || sizeValue === 'واحد')) return 'قطعة';
+    if (sizeValue === '-' || sizeValue === '') return label;
+    return sizeValue + ' ' + label;
 }
 
 function getProductDiscountPercent(product, discounts) {
@@ -123,22 +210,12 @@ function getProductDiscountPercent(product, discounts) {
 
 function getFinalPrice(product, sizeIdx, discounts) {
     var sizeData = getSizeData(product, sizeIdx);
+    var original = Math.max(0, Number(sizeData.price) || 0);
     var discountPercent = getProductDiscountPercent(product, discounts || []);
     if (discountPercent > 0) {
-        return {
-            original: Number(sizeData.price) || 0,
-            final: Math.round((Number(sizeData.price) || 0) * (1 - discountPercent / 100)),
-            hasDiscount: true,
-            discountPercent: discountPercent
-        };
+        return { original: original, final: Math.round(original * (1 - discountPercent / 100)), hasDiscount: true, discountPercent: discountPercent };
     }
-
-    return {
-        original: Number(sizeData.price) || 0,
-        final: Number(sizeData.price) || 0,
-        hasDiscount: false,
-        discountPercent: 0
-    };
+    return { original: original, final: original, hasDiscount: false, discountPercent: 0 };
 }
 
 function escapeHtml(value) {
@@ -150,75 +227,36 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-function normalizeCustomPackageSet(entry) {
-    return {
-        chocolateType: String(entry && entry.chocolateType ? entry.chocolateType : 'mixed'),
-        filling: String(entry && entry.filling ? entry.filling : 'plain'),
-        qty: Math.max(1, parseInt(entry && entry.qty, 10) || 1)
-    };
-}
-
-function normalizeCustomPackageItem(item) {
-    var sets = Array.isArray(item && item.sets)
-        ? item.sets.map(function (entry) { return normalizeCustomPackageSet(entry); }).filter(function (entry) { return entry.qty > 0; })
-        : [];
-    if (!sets.length) sets = [normalizeCustomPackageSet({})];
-    var delivery = item && item.delivery === 'pickup' ? 'pickup' : 'delivery';
-    return {
-        type: 'custom_package',
-        id: String(item && item.id ? item.id : 'pkg_' + Date.now()),
-        sets: sets,
-        wrapperColor: String(item && item.wrapperColor ? item.wrapperColor : 'gold'),
-        notes: String(item && item.notes ? item.notes : ''),
-        delivery: delivery,
-        customerName: String(item && item.customerName ? item.customerName : ''),
-        customerPhone: String(item && item.customerPhone ? item.customerPhone : ''),
-        customerLocation: delivery === 'delivery' ? String(item && item.customerLocation ? item.customerLocation : '') : '',
-        qty: 1,
-        pricePending: true
-    };
-}
-
-function isCustomPackageItem(item) {
-    return !!(item && item.type === 'custom_package');
-}
-
-function getCustomPackageTitle(item) {
-    var setsCount = Array.isArray(item && item.sets) ? item.sets.length : 0;
-    return 'علبة مخصصة (' + setsCount + ' تشكيلات)';
-}
-
-function hasCustomPricingPending(items) {
-    return (Array.isArray(items) ? items : []).some(function (item) {
-        return isCustomPackageItem(item);
-    });
-}
-
-function getTotalDisplayText(total, hasPending) {
-    var safeTotal = Math.max(0, Number(total) || 0);
-    if (hasPending) {
-        return safeTotal > 0 ? formatCurrency(safeTotal) + ' + سعر العلبة المخصصة يحدد لاحقاً' : 'يحدد بعد تأكيد الإدارة';
+function reportClientError(error) {
+    if (typeof window !== 'undefined' && window.DEBUG_MODE && window.console && typeof window.console.error === 'function') {
+        window.console.error(error);
     }
-    return formatCurrency(safeTotal);
 }
 
 function normalizeCartItems(items, products) {
-    return (Array.isArray(items) ? items : []).map(function (item) {
-        if (isCustomPackageItem(item)) return normalizeCustomPackageItem(item);
-        var itemId = item.id;
-        var product = Array.isArray(products) ? products.find(function (entry) { return String(entry.id) === String(itemId); }) : null;
+    var list = Array.isArray(items) ? items : [];
+    var catalog = Array.isArray(products) ? products : [];
+    var normalized = [];
+    var i;
+    var j;
+    for (i = 0; i < list.length; i += 1) {
+        var item = list[i] || {};
+        var product = null;
+        for (j = 0; j < catalog.length; j += 1) {
+            if (String(catalog[j].id) === String(item.id)) {
+                product = catalog[j];
+                break;
+            }
+        }
         var sizesLength = product && Array.isArray(product.sizes) && product.sizes.length ? product.sizes.length : 1;
-        var safeSizeIdx = Math.max(0, Math.min(sizesLength - 1, parseInt(item.sizeIdx, 10) || 0));
-        return {
-            id: itemId,
-            sizeIdx: safeSizeIdx,
+        normalized.push({
+            id: String(item.id || ''),
+            sizeIdx: Math.max(0, Math.min(sizesLength - 1, parseInt(item.sizeIdx, 10) || 0)),
             qty: Math.max(1, parseInt(item.qty, 10) || 1),
             price: Math.max(0, Number(item.price) || 0)
-        };
-    }).filter(function (item) {
-        if (isCustomPackageItem(item)) return !!item.id;
-        return !!item.id;
-    });
+        });
+    }
+    return normalized.filter(function (item) { return !!item.id; });
 }
 
 function formatCurrency(value) {
@@ -234,8 +272,7 @@ function formatDateTime(dateValue) {
 function makeOrderId() {
     var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     var code = '';
-    for (var idx = 0; idx < 5; idx += 1) {
-        code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-    }
+    var idx;
+    for (idx = 0; idx < 5; idx += 1) code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     return 'ORD-' + code;
 }

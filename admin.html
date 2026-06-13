@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makka Carpentry Supplies - لوحة التحكم</title>
+    <meta name="description" content="لوحة تحكم شركة مكة لإدارة المنتجات والطلبات وتجار الجملة.">
+    <link rel="icon" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
             <h1>لوحة التحكم</h1>
-            <p>إيناس شوب</p>
+            <p>شركة مكة للنجارة</p>
             <form onsubmit="handleLogin(event)">
-                <input type="text" id="loginUser" placeholder="اسم المستخدم" required>
-                <input type="password" id="loginPass" placeholder="كلمة المرور" required>
+                <input type="text" id="loginUser" placeholder="اسم المستخدم" autocomplete="username" required>
+                <input type="password" id="loginPass" placeholder="كلمة المرور" autocomplete="current-password" required>
                 <button type="submit">دخول</button>
-                <p class="error" id="loginError"></p>
+                <p class="error" id="loginError" aria-live="polite"></p>
             </form>
         </div>
     </div>
@@ -27,9 +32,11 @@
                 <h2>لوحة التحكم</h2>
                 <div class="admin-tabs">
                     <button class="tab-btn active" onclick="switchTab('dashboard', this)">لوحة المعلومات</button>
-                    <button class="tab-btn" onclick="switchTab('products', this)">المنتجات</button>
-                    <button class="tab-btn" onclick="switchTab('orders', this)">الطلبات</button>
+                    <button class="tab-btn" onclick="switchTab('products', this)">المنتجات <span class="low-stock-badge" id="lowStockBadge" style="display:none;">0</span></button>
+                    <button class="tab-btn" onclick="switchTab('orders', this)">الطلبات <span class="tab-notification-badge" id="newOrdersBadge" style="display:none;">0</span></button>
                     <button class="tab-btn" onclick="switchTab('settings', this)">الإعدادات</button>
+                    <button class="tab-btn" onclick="switchTab('wholesale-users', this)">تجار الجملة <span class="tab-notification-badge" id="wholesaleRequestsBadge" style="display:none;">0</span></button>
+                    <button class="tab-btn" onclick="switchTab('wholesale', this)">أسعار الجملة</button>
                 </div>
                 <button class="logout-btn" onclick="logout()">خروج</button>
             </div>
@@ -55,7 +62,30 @@
             <div class="tab-header">
                 <h3>إدارة المنتجات والخصومات</h3>
                 <div class="header-actions">
+                    <button class="btn-secondary" id="productsBackBtn" onclick="showProductsCategoryGrid()" style="display:none;">رجوع</button>
+                    <button class="btn-secondary" id="downloadTemplateBtn" onclick="downloadEmptyProductsTemplate()" style="display:none;">تحميل نموذج فارغ</button>
+                    <button class="btn-secondary" id="downloadExcelBtn" onclick="downloadCategoryExcel()" style="display:none;">تحميل Excel</button>
+                    <label class="file-action-btn" id="uploadExcelBtn" style="display:none;">
+                        <span>رفع Excel</span>
+                        <input type="file" id="productsExcelInput" accept=".xlsx" onchange="handleProductsExcelUpload(this)">
+                    </label>
                     <button class="btn-add" onclick="openProductModal()">إضافة منتج</button>
+                </div>
+            </div>
+            <div class="products-category-panel" id="productsCategoryGrid"></div>
+            <div class="products-category-table-view" id="productsCategoryTableView" style="display:none;">
+                <div class="products-category-summary">
+                    <div>
+                        <p class="products-category-label">القسم المحدد</p>
+                        <h4 id="productsCategoryTitle">-</h4>
+                    </div>
+                    <span class="products-category-count" id="productsCategoryCount">0 منتج</span>
+                </div>
+                <div class="products-table-container">
+                    <table class="admin-table" id="productsTable">
+                        <thead><tr><th><input type="checkbox" id="selectAllProducts" onchange="toggleSelectAll(this)"></th><th>صورة</th><th>اسم المنتج</th><th>الماركة</th><th>الفئة</th><th>الأحجام</th><th>الأسعار</th><th>خصم</th><th>الكمية</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
                 </div>
             </div>
             <div class="bulk-actions-bar" id="bulkActionsBar" style="display:none;">
@@ -71,12 +101,6 @@
                 <input type="number" id="bulkDiscountInput" min="0" max="99" placeholder="خصم %">
                 <button class="btn-bulk-discount" onclick="bulkApplyDiscount()">تطبيق خصم</button>
                 <button class="btn-bulk-delete" onclick="bulkDeleteProducts()">حذف المحدد</button>
-            </div>
-            <div class="products-table-container">
-                <table class="admin-table" id="productsTable">
-                    <thead><tr><th><input type="checkbox" id="selectAllProducts" onchange="toggleSelectAll(this)"></th><th>صورة</th><th>اسم المنتج</th><th>الماركة</th><th>الفئة</th><th>الأحجام</th><th>الأسعار</th><th>خصم</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-                    <tbody id="productsTableBody"></tbody>
-                </table>
             </div>
 
             <div class="tab-header nested-header">
@@ -94,7 +118,12 @@
             <div class="tab-header">
                 <h3>إدارة الطلبات</h3>
                 <div class="orders-filters">
-                    <input type="text" id="orderSearchInput" placeholder="ابحثي بالاسم أو الهاتف" oninput="renderOrdersTable()">
+                    <div class="orders-type-filters">
+                        <button type="button" class="filter-toggle-btn active" onclick="setOrderTypeFilter('all', this)">الكل</button>
+                        <button type="button" class="filter-toggle-btn" onclick="setOrderTypeFilter('retail', this)">طلبات مفرق</button>
+                        <button type="button" class="filter-toggle-btn" onclick="setOrderTypeFilter('wholesale', this)">طلبات جملة</button>
+                    </div>
+                    <input type="text" id="orderSearchInput" placeholder="ابحث بالاسم أو الهاتف" oninput="renderOrdersTable()">
                     <select id="orderStatusFilter" onchange="renderOrdersTable()">
                         <option value="all">كل الحالات</option>
                         <option value="new">جديد</option>
@@ -106,7 +135,7 @@
             </div>
             <div class="products-table-container">
                 <table class="admin-table">
-                    <thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>العميل</th><th>الهاتف</th><th>عدد القطع</th><th>الإجمالي</th><th>التوصيل</th><th>الحالة</th></tr></thead>
+                    <thead><tr><th>رقم الطلب</th><th>النوع</th><th>التاريخ</th><th>العميل</th><th>الهاتف</th><th>عدد القطع</th><th>الإجمالي</th><th>التوصيل</th><th>الحالة</th><th>التفاصيل</th></tr></thead>
                     <tbody id="ordersTableBody"></tbody>
                 </table>
             </div>
@@ -129,6 +158,49 @@
                 <p style="color:#888;font-size:13px;margin-top:8px;">سيتم تسجيل خروج جميع المستخدمين المتصلين حالياً (بما فيهم أنت)</p>
             </div>
         </div>
+
+        <div class="tab-content" id="tab-wholesale-users">
+            <div class="tab-header">
+                <h3>تجار الجملة</h3>
+                <div class="wholesale-users-summary">
+                    <span class="summary-pill pending">بانتظار الموافقة: <strong id="wholesalePendingCount">0</strong></span>
+                    <span class="summary-pill approved">معتمد: <strong id="wholesaleApprovedCount">0</strong></span>
+                    <span class="summary-pill updates">طلبات تعديل: <strong id="wholesaleUpdateCount">0</strong></span>
+                </div>
+            </div>
+            <div class="wholesale-filters">
+                <button type="button" class="filter-toggle-btn active" onclick="setWholesaleFilter('all', this)">الكل</button>
+                <button type="button" class="filter-toggle-btn" onclick="setWholesaleFilter('action', this)">تتطلب إجراء</button>
+                <button type="button" class="filter-toggle-btn" onclick="setWholesaleFilter('location', this)">الموقع</button>
+                <button type="button" class="filter-toggle-btn" onclick="setWholesaleFilter('edit', this)">طلبات تعديل</button>
+                <button type="button" class="filter-toggle-btn" onclick="setWholesaleFilter('add', this)">طلبات إضافة</button>
+            </div>
+            <div class="products-table-container">
+                <table class="admin-table" id="wholesaleUsersTable">
+                    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الشركة</th><th>الموقع</th><th>تاريخ التسجيل</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                    <tbody id="wholesaleUsersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-wholesale">
+            <div class="tab-header"><h3>أسعار الجملة</h3></div>
+            <div class="wholesale-pricing-card">
+                <p class="wholesale-help">هذه الأسعار مرجعية للإدارة فقط، ولا تظهر للعملاء عند تفعيل وضع الجملة.</p>
+                <div id="wholesalePricesContainer" class="wholesale-prices-grid"></div>
+                <button type="button" class="btn-save" onclick="saveWholesalePrices()">حفظ أسعار الجملة</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="wholesaleUserModal" style="display:none;">
+        <div class="modal small-modal wholesale-user-modal-card">
+            <div class="modal-header-inline">
+                <h3 id="wholesaleUserModalTitle">تفاصيل تاجر الجملة</h3>
+                <button type="button" class="modal-close-btn" onclick="closeWholesaleUserModal()">✕</button>
+            </div>
+            <div id="wholesaleUserModalContent"></div>
+        </div>
     </div>
 
     <div class="modal-overlay" id="productModal" style="display:none;">
@@ -144,6 +216,7 @@
                     <div class="form-group"><label>الفئة</label><input type="text" id="productCategory" required list="categoriesList"><datalist id="categoriesList"></datalist></div>
                     <div class="form-group"><label>خصم (%)</label><input type="number" id="productDiscount" value="0" min="0" max="99"></div>
                 </div>
+                <div class="form-group"><label>الكمية المتوفرة</label><input type="number" id="productQuantity" value="0" min="0"></div>
                 <div class="form-group"><label>الأحجام والأسعار</label><div id="sizesContainer" class="sizes-container"></div><button type="button" class="btn-add-size" onclick="addSizeRow()">+ إضافة حجم</button></div>
                 <div class="form-group"><label>صورة المنتج</label>
                     <div class="image-upload-group">
@@ -153,6 +226,7 @@
                     </div>
                     <div id="imagePreview" class="image-preview"></div>
                 </div>
+                <div class="form-group"><label>الوصف</label><textarea id="productDescription" rows="4" placeholder="وصف مختصر للمنتج"></textarea></div>
                 <div class="form-group"><label>الحالة</label><select id="productStatus"><option value="normal">عادي</option><option value="bestseller">الأكثر مبيعاً</option><option value="special">مميز</option><option value="soldout">نفذت الكمية</option></select></div>
                 <div class="modal-actions"><button type="submit" class="btn-save">حفظ</button><button type="button" class="btn-cancel" onclick="closeModal('productModal')">إلغاء</button></div>
             </form>
@@ -165,13 +239,91 @@
             <form onsubmit="event.preventDefault(); saveDiscount(event)">
                 <input type="hidden" id="discountId">
                 <div class="form-group"><label>نوع الخصم</label><select id="discountType" onchange="toggleDiscountValueField()"><option value="all">على جميع المنتجات</option><option value="brand">حسب الماركة</option><option value="category">حسب الفئة</option><option value="manual">يدوي</option></select></div>
-                <div class="form-group" id="discountValueGroup" style="display:none;"><label>اختاري (يمكن اختيار أكثر من واحد)</label><div id="discountValueCheckboxes" class="checkbox-list"></div></div>
+                <div class="form-group" id="discountValueGroup" style="display:none;"><label>اختر (يمكن اختيار أكثر من واحد)</label><div id="discountValueCheckboxes" class="checkbox-list"></div></div>
                 <div class="form-group" id="discountManualGroup" style="display:none;"><label>عنوان يدوي</label><input type="text" id="discountManualValue" placeholder="مثال: خصم موسمي"></div>
                 <div class="form-group"><label>نسبة الخصم (%)</label><input type="number" id="discountPercentage" min="0" max="99" required></div>
                 <div class="form-group"><label>تاريخ الانتهاء (اختياري)</label><input type="date" id="discountExpiry"></div>
                 <div class="form-group"><label>وصف الخصم (يظهر في البانر)</label><input type="text" id="discountDescription" placeholder="خصم 20% على جميع منتجات..." required></div>
                 <div class="modal-actions"><button type="submit" class="btn-save">حفظ</button><button type="button" class="btn-cancel" onclick="closeModal('discountModal')">إلغاء</button></div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="orderDetailsModal" style="display:none;" onclick="if (event.target === this) closeModal('orderDetailsModal')">
+        <div class="modal order-details-modal" onclick="event.stopPropagation()">
+            <div class="order-details-modal-head">
+                <div>
+                    <h3 id="orderDetailsTitle">تفاصيل الطلب</h3>
+                    <p id="orderDetailsSubtitle" class="order-details-modal-subtitle"></p>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeModal('orderDetailsModal')">✕</button>
+            </div>
+
+            <div class="order-details-summary" id="orderDetailsSummary"></div>
+
+            <div class="order-details-section">
+                <div class="order-details-section-head">
+                    <h4>بيانات العميل</h4>
+                    <select id="orderDetailsStatusSelect" class="order-status-select" onchange="updateCurrentOrderStatus(this.value)">
+                        <option value="new">جديد</option>
+                        <option value="processing">قيد المعالجة</option>
+                        <option value="completed">مكتمل</option>
+                        <option value="cancelled">ملغي</option>
+                    </select>
+                </div>
+                <div class="order-details-info-grid" id="orderDetailsInfoGrid"></div>
+                <div class="order-details-notes" id="orderDetailsNotes" style="display:none;"></div>
+            </div>
+
+            <div class="order-details-section" id="orderPricingSection" style="display:none;">
+                <div class="order-details-section-head">
+                    <h4>تسعير الطلب</h4>
+                    <span class="order-pricing-hint">يمكنك تسعير كل صنف أو إدخال سعر إجمالي للطلب.</span>
+                </div>
+                <div class="order-pricing-mode">
+                    <label class="pricing-mode-option">
+                        <input type="radio" name="orderPricingMode" value="itemized" onchange="setOrderPricingMode('itemized')">
+                        <span>تسعير فردي</span>
+                    </label>
+                    <label class="pricing-mode-option">
+                        <input type="radio" name="orderPricingMode" value="total" onchange="setOrderPricingMode('total')">
+                        <span>سعر إجمالي</span>
+                    </label>
+                </div>
+                <div class="order-total-override" id="orderTotalOverrideWrap" style="display:none;">
+                    <label for="orderTotalOverrideInput">سعر إجمالي للطلب</label>
+                    <input type="number" id="orderTotalOverrideInput" min="0" step="0.01" placeholder="أدخل السعر الإجمالي" oninput="updateOrderPricingTotals()">
+                </div>
+            </div>
+
+            <div class="order-details-section">
+                <div class="order-details-section-head">
+                    <h4>المنتجات</h4>
+                    <span id="orderPricingReadOnlyLabel" class="order-pricing-readonly"></span>
+                </div>
+                <div class="order-items-table-wrap">
+                    <table class="admin-table order-items-table">
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>المقاس</th>
+                                <th>الكمية</th>
+                                <th>سعر الوحدة</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderDetailsItemsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="order-details-footer">
+                <div class="order-details-total-box">
+                    <span>المجموع النهائي</span>
+                    <strong id="orderDetailsGrandTotal">₪0</strong>
+                </div>
+                <button type="button" class="btn-save" id="orderSavePricingBtn" onclick="saveOrderPricing()" style="display:none;">حفظ الأسعار</button>
+            </div>
         </div>
     </div>
 

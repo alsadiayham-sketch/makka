@@ -4,15 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Makka Carpentry Supplies | تم تأكيد الطلب</title>
+    <meta name="description" content="ملخص طلبك لدى شركة مكة مع رقم الطلب وإمكانية إعادة إرسال الطلب عبر واتساب.">
+    <meta property="og:title" content="شركة مكة | تم تأكيد الطلب">
+    <meta property="og:description" content="راجع ملخص طلبك، انسخ رقم الطلب، أو أعد إرساله عبر واتساب.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="logo.png">
+    <meta property="og:locale" content="ar_PS">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.png">
     <style>
         .confirmation-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: linear-gradient(135deg, #f5f3ed, #fafaf8); }
         .confirmation-card { background: white; border-radius: 24px; padding: 40px; max-width: 650px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.14); text-align: center; animation: confirmSlideIn 0.6s ease; }
         @keyframes confirmSlideIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .success-icon { width: 74px; height: 74px; margin: 0 auto 15px; border-radius: 50%; background: var(--primary-lighter); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; }
         .confirmation-card h1 { font-size: 1.8rem; color: var(--primary-dark); margin-bottom: 5px; }
-        .confirmation-card .order-id { font-size: 0.95rem; color: var(--text-light); margin-bottom: 25px; }
+        .confirmation-card .order-id { font-size: 0.95rem; color: var(--text-light); margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .copy-order-btn { border: none; border-radius: 999px; background: rgba(139, 90, 43, 0.1); color: var(--primary-dark); padding: 8px 14px; font-family: 'Tajawal', sans-serif; font-weight: 700; cursor: pointer; }
+        .copy-order-feedback { color: #166534; font-weight: 700; }
         .order-details { text-align: right; background: var(--bg-alt); border-radius: 16px; padding: 20px; margin: 20px 0; }
         .order-details h3 { font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary-lighter); }
         .order-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
@@ -35,10 +46,13 @@
         .btn-whatsapp-confirm:hover { background: #1da851; transform: translateY(-2px); }
         .btn-continue { background: var(--primary); color: white; }
         .btn-continue:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .confirmation-empty { color: var(--text-light); line-height: 1.8; }
+        .confirmation-loading { color: var(--primary-dark); font-weight: 700; }
         .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
         .confetti-piece { position: absolute; width: 10px; height: 10px; border-radius: 50%; animation: confettiFall 3s ease-in forwards; }
         @keyframes confettiFall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
         @media (max-width: 768px) { .confirmation-card { padding: 25px; } .confirmation-card h1 { font-size: 1.4rem; } }
+        @media print { .confirmation-actions, .copy-order-btn, .copy-order-feedback, .confetti { display: none !important; } body { background: white; } .confirmation-card { box-shadow: none; border: 1px solid #ddd; } }
     </style>
 </head>
 <body>
@@ -47,7 +61,7 @@
         <div class="confirmation-card">
             <div class="success-icon">✓</div>
             <h1>تم تأكيد طلبك بنجاح</h1>
-            <p class="order-id" id="orderId"></p>
+            <div class="order-id"><span id="orderId"></span><button type="button" class="copy-order-btn" onclick="copyOrderId()">نسخ رقم الطلب</button><span class="copy-order-feedback" id="copyOrderFeedback"></span></div>
             <div class="order-details">
                 <h3>تفاصيل الطلب</h3>
                 <div id="orderItems"></div>
@@ -71,20 +85,41 @@
     <script src="data.js"></script>
     <script>
         var siteSettings = normalizeSettings(DEFAULT_SITE_SETTINGS);
+        function getStoredOrder() {
+            var raw = sessionStorage.getItem('makka_last_order') || localStorage.getItem('makka_last_order') || localStorage.getItem('drenasshop_last_order') || 'null';
+            var parsed = null;
+            try {
+                parsed = JSON.parse(raw);
+            } catch (error) {
+                parsed = null;
+            }
+            if (parsed) {
+                sessionStorage.setItem('makka_last_order', JSON.stringify(parsed));
+                localStorage.removeItem('makka_last_order');
+                localStorage.removeItem('drenasshop_last_order');
+            }
+            return parsed;
+        }
+        function renderMissingOrderState() {
+            var card = document.querySelector('.confirmation-card');
+            if (!card) return;
+            card.innerHTML = '<div class="success-icon">!</div><h1>لا توجد بيانات طلب حالياً</h1><p class="confirmation-empty">تعذر العثور على بيانات الطلب في هذه الجلسة. يمكنك العودة إلى المتجر وإنشاء طلب جديد في أي وقت.</p><div class="confirmation-actions"><a href="index.html" class="btn-continue">العودة للرئيسية</a></div>';
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
-            var order = JSON.parse(localStorage.getItem('drenasshop_last_order'));
+            var order = getStoredOrder();
             if (!order) {
-                window.location.href = 'index.html';
+                renderMissingOrderState();
                 return;
             }
 
             if (window.db) {
+                document.getElementById('orderInfo').innerHTML = '<div class="confirmation-loading">جاري تحميل بيانات المتجر...</div>';
                 db.collection('settings').doc('config').get().then(function (settingsSnap) {
                     if (settingsSnap.exists) siteSettings = normalizeSettings(settingsSnap.data());
                     renderOrder(order);
                 }).catch(function (error) {
-                    console.error(error);
+                    reportClientError(error);
                     renderOrder(order);
                 });
             } else {
@@ -92,6 +127,39 @@
             }
         });
 
+        function copyTextWithFallback(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+            return new Promise(function (resolve, reject) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', 'readonly');
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    resolve();
+                } catch (error) {
+                    document.body.removeChild(textarea);
+                    reject(error);
+                }
+            });
+        }
+        function copyOrderId() {
+            var orderIdNode = document.getElementById('orderId');
+            var feedbackNode = document.getElementById('copyOrderFeedback');
+            if (!orderIdNode) return;
+            var orderText = (orderIdNode.textContent || '').replace('رقم الطلب: ', '').trim();
+            if (!orderText) return;
+            copyTextWithFallback(orderText).then(function () {
+                if (feedbackNode) {
+                    feedbackNode.textContent = 'تم النسخ!';
+                    setTimeout(function () { feedbackNode.textContent = ''; }, 1800);
+                }
+            });
+        }
         function renderOrder(order) {
             document.getElementById('orderId').textContent = 'رقم الطلب: ' + order.id;
             document.getElementById('orderItems').innerHTML = (order.items || []).map(function (item) {
@@ -101,19 +169,19 @@
                     meta += '<span class="order-item-meta">' + (item.delivery === 'pickup' ? 'استلام من المصنع' : 'توصيل') + ' • ' + escapeHtml(item.customerName || '') + ' • ' + escapeHtml(item.customerPhone || '') + '</span>';
                     if (item.delivery === 'delivery' && item.customerLocation) meta += '<span class="order-item-meta">الموقع: ' + escapeHtml(item.customerLocation) + '</span>';
                     if (item.notes) meta += '<span class="order-item-note">ملاحظات: ' + escapeHtml(item.notes) + '</span>';
-                    return '<div class="order-item"><div><span class="order-item-name">' + getCustomPackageTitle(item) + '</span>' + meta + '</div><span class="order-item-price pending">يحدد لاحقاً</span></div>';
+                    return '<div class="order-item"><div><span class="order-item-name">' + escapeHtml(getCustomPackageTitle(item)) + '</span>' + meta + '</div><span class="order-item-price pending">يحدد لاحقاً</span></div>';
                 }
-                return '<div class="order-item"><div><span class="order-item-name">' + item.name + '</span><span class="order-item-qty">' + item.brand + ' • ' + item.sizeLabel + ' • x' + item.qty + '</span></div><span class="order-item-price">' + formatCurrency(item.lineTotal) + '</span></div>';
+                return '<div class="order-item"><div><span class="order-item-name">' + escapeHtml(item.name || '-') + '</span><span class="order-item-qty">' + escapeHtml(item.brand || '-') + ' • ' + escapeHtml(item.sizeLabel || '-') + ' • x' + escapeHtml(item.qty || 1) + '</span></div><span class="order-item-price">' + formatCurrency(item.lineTotal) + '</span></div>';
             }).join('');
             var totalItems = (order.items || []).reduce(function (sum, item) { return sum + (parseInt(item.qty, 10) || 1); }, 0);
             document.getElementById('orderCount').textContent = totalItems + ' قطعة';
             document.getElementById('orderDelivery').textContent = order.delivery === 'pickup' ? 'استلام ذاتي' : 'توصيل';
             document.getElementById('orderTotal').textContent = order.totalDisplay || getTotalDisplayText(order.total, !!order.pricingPending);
-            var info = '<span><strong>الاسم:</strong> ' + order.customerName + '</span>';
-            info += '<span><strong>الهاتف:</strong> ' + order.customerPhone + '</span>';
-            if (order.delivery === 'delivery' && order.address) info += '<span><strong>العنوان:</strong> ' + order.address + '</span>';
-            if (order.notes) info += '<span><strong>ملاحظات:</strong> ' + order.notes + '</span>';
-            info += '<span><strong>التاريخ:</strong> ' + formatDateTime(order.date) + '</span>';
+            var info = '<span><strong>الاسم:</strong> ' + escapeHtml(order.customerName || '-') + '</span>';
+            info += '<span><strong>الهاتف:</strong> ' + escapeHtml(order.customerPhone || '-') + '</span>';
+            if (order.delivery === 'delivery' && order.address) info += '<span><strong>العنوان:</strong> ' + escapeHtml(order.address) + '</span>';
+            if (order.notes) info += '<span><strong>ملاحظات:</strong> ' + escapeHtml(order.notes) + '</span>';
+            info += '<span><strong>التاريخ:</strong> ' + escapeHtml(formatDateTime(order.date)) + '</span>';
             document.getElementById('orderInfo').innerHTML = info;
             document.getElementById('whatsappConfirmBtn').href = buildWhatsAppUrl(siteSettings.whatsappNumber || '970595170026', buildWhatsAppMessage(order));
             createConfetti();

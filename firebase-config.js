@@ -1,6 +1,6 @@
 (function (global) {
     if (typeof firebase === 'undefined') {
-        console.error('Firebase SDK failed to load.');
+        global.firebaseInitFailed = true;
         return;
     }
 
@@ -35,7 +35,7 @@
     };
 
     // Separate reference for admin auth (outside project scope for security)
-    var adminRef = rawDb.collection('admin_auth').doc(PROJECT_ID);
+    var adminRef = rawDb.collection('projects').doc(PROJECT_ID).collection('admin_auth').doc('credentials');
 
     global.firebaseConfig = firebaseConfig;
     global.db = db;

@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-orange.css">
   <link rel="icon" href="logo.png">
 </head>
 <body class="home-page">
@@ -25,7 +26,6 @@
       <div class="nav-links">
         <a href="#categories">الأقسام</a>
         <a href="#wholesale">تجار الجملة</a>
-        <a href="wholesale-profile.html" id="navWholesaleProfileLink" style="display:none;">حسابي</a>
         <a href="#about">من نحن</a>
         <a href="#contact">تواصل معنا</a>
       </div>
@@ -39,7 +39,6 @@
     <div class="mobile-menu" id="mobileMenu">
       <a href="#categories" onclick="toggleMobileMenu()">الأقسام</a>
       <a href="#wholesale" onclick="toggleMobileMenu()">تجار الجملة</a>
-      <a href="wholesale-profile.html" id="mobileWholesaleProfileLink" onclick="toggleMobileMenu()" style="display:none;">حسابي</a>
       <a href="#about" onclick="toggleMobileMenu()">من نحن</a>
       <a href="#contact" onclick="toggleMobileMenu()">تواصل معنا</a>
       <button type="button" class="nav-wholesale-btn full-width" id="mobileWholesaleToggle" onclick="toggleWholesaleMode()">تفعيل وضع الجملة</button>
@@ -92,7 +91,6 @@
             <button type="button" class="btn btn-primary wood-sign-btn" id="wholesaleModeBtn" onclick="toggleWholesaleMode()">تفعيل وضع الجملة</button>
             <a href="category.html?type=%D9%81%D8%B5%D8%A7%D9%84%D9%8A%D8%A7%D8%AA" class="btn btn-secondary" id="wholesaleBrowseBtn">ابدأ التصفح</a>
           </div>
-          <div class="wholesale-auth-status" id="wholesaleAuthStatus" style="display:none;"></div>
         </div>
       </div>
     </section>
@@ -136,93 +134,11 @@
   </main>
 
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-
-  <!-- PDP Modal -->
-  <div class="pdp-overlay" id="pdpOverlay" onclick="closePDP()"></div>
-  <div class="pdp-modal" id="pdpModal">
-    <button class="pdp-close" type="button" onclick="closePDP()">✕</button>
-    <div class="pdp-content" id="pdpContent"></div>
-  </div>
   <div class="cart-sidebar" id="cartSidebar">
     <div class="cart-header"><h3>سلة التسوق</h3><button class="cart-close" type="button" onclick="toggleCart()">✕</button></div>
     <div class="cart-items" id="cartItems"><div class="cart-empty"><span>🛒</span><p>السلة فارغة</p></div></div>
     <div class="cart-footer" id="cartFooter" style="display:none;"><div class="cart-total"><span>المجموع:</span><span id="cartTotal">₪0</span></div><a href="checkout.html" class="btn-checkout" id="checkoutBtn">إتمام الطلب</a><button class="btn-clear-cart" type="button" onclick="clearCart()">تفريغ السلة</button></div>
   </div>
-  <div class="wholesale-auth-overlay" id="wholesaleAuthOverlay" onclick="closeWholesaleAuthModal(event)"></div>
-  <div class="wholesale-auth-modal" id="wholesaleAuthModal" role="dialog" aria-modal="true" aria-labelledby="wholesaleAuthTitle">
-    <button type="button" class="wholesale-auth-close" onclick="closeWholesaleAuthModal()">✕</button>
-    <div class="wholesale-auth-head">
-      <span class="section-kicker">تجار الجملة</span>
-      <h3 id="wholesaleAuthTitle">حساب تجار الجملة</h3>
-      <p id="wholesaleAuthSubtitle">سجّل دخولك أو أنشئ حساباً جديداً حتى تتمكن من تفعيل وضع الجملة بعد موافقة الإدارة. يمكنك أيضاً استخدام رمز إعادة التعيين المؤقت إذا وصلك من الإدارة.</p>
-    </div>
-    <div class="wholesale-auth-tabs" id="wholesaleAuthTabs">
-      <button type="button" class="wholesale-tab-btn active" id="wholesaleSignInTab" onclick="switchWholesaleAuthTab('signin')">تسجيل الدخول</button>
-      <button type="button" class="wholesale-tab-btn" id="wholesaleSignUpTab" onclick="switchWholesaleAuthTab('signup')">إنشاء حساب</button>
-    </div>
-    <div class="wholesale-auth-message" id="wholesaleAuthMessage" style="display:none;"></div>
-    <div class="wholesale-auth-body">
-      <form id="wholesaleSignInForm" class="wholesale-auth-form active">
-        <div class="wholesale-form-group">
-          <label for="wholesaleSignInEmail">البريد الإلكتروني</label>
-          <input type="email" id="wholesaleSignInEmail" autocomplete="email" required>
-        </div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleSignInPassword">كلمة المرور أو رمز التعيين</label>
-          <input type="password" id="wholesaleSignInPassword" autocomplete="current-password" required>
-        </div>
-        <button type="submit" class="btn btn-primary wholesale-submit-btn">تسجيل الدخول</button>
-      </form>
-      <form id="wholesaleSignUpForm" class="wholesale-auth-form">
-        <div class="wholesale-form-grid">
-          <div class="wholesale-form-group">
-            <label for="wholesaleSignUpFirstName">الاسم الأول</label>
-            <input type="text" id="wholesaleSignUpFirstName" autocomplete="given-name" required>
-          </div>
-          <div class="wholesale-form-group">
-            <label for="wholesaleSignUpLastName">اسم العائلة</label>
-            <input type="text" id="wholesaleSignUpLastName" autocomplete="family-name" required>
-          </div>
-        </div>
-        <div class="wholesale-form-grid">
-          <div class="wholesale-form-group">
-            <label for="wholesaleSignUpLocation">الموقع / المنطقة</label>
-            <input type="text" id="wholesaleSignUpLocation" autocomplete="address-level2" required>
-          </div>
-          <div class="wholesale-form-group">
-            <label for="wholesaleSignUpCompany">اسم الشركة</label>
-            <input type="text" id="wholesaleSignUpCompany" autocomplete="organization" required>
-          </div>
-        </div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleSignUpEmail">البريد الإلكتروني</label>
-          <input type="email" id="wholesaleSignUpEmail" autocomplete="email" required>
-        </div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleSignUpPassword">كلمة المرور</label>
-          <input type="password" id="wholesaleSignUpPassword" autocomplete="new-password" minlength="6" required>
-        </div>
-        <button type="submit" class="btn btn-primary wholesale-submit-btn">إنشاء الحساب</button>
-      </form>
-      <form id="wholesaleOtpResetForm" class="wholesale-auth-form">
-        <div class="wholesale-inline-note">تم التحقق من رمز إعادة التعيين. اختر كلمة مرور جديدة ثم تابع الدخول إلى حسابك.</div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleOtpResetEmail">البريد الإلكتروني</label>
-          <input type="email" id="wholesaleOtpResetEmail" readonly>
-        </div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleOtpResetPassword">كلمة المرور الجديدة</label>
-          <input type="password" id="wholesaleOtpResetPassword" autocomplete="new-password" minlength="6" required>
-        </div>
-        <div class="wholesale-form-group">
-          <label for="wholesaleOtpResetConfirmPassword">تأكيد كلمة المرور الجديدة</label>
-          <input type="password" id="wholesaleOtpResetConfirmPassword" autocomplete="new-password" minlength="6" required>
-        </div>
-        <button type="submit" class="btn btn-primary wholesale-submit-btn">حفظ كلمة المرور الجديدة</button>
-      </form>
-    </div>
-  </div>
-
 
   <footer class="footer"><p>© 2026 شركة مكة لإكسسوارات ولوازم النجارين — تشطيب يليق بكل ورشة.</p></footer>
   <button class="scroll-top" id="scrollTop" aria-label="العودة إلى الأعلى">↑</button>

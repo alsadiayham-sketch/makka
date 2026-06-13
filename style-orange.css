@@ -1,0 +1,109 @@
+/* Orange & White Theme Override */
+:root {
+  --black: #1a1a1a;
+  --charcoal: #4a4a4a;
+  --primary: #f97316;
+  --primary-dark: #ea580c;
+  --accent: #f97316;
+  --accent-dark: #c2410c;
+  --accent-soft: #fed7aa;
+  --cream: #ffffff;
+  --bg: #ffffff;
+  --bg-alt: #fff7ed;
+  --white: #ffffff;
+  --border: rgba(249, 115, 22, 0.2);
+  --shadow: 0 18px 38px rgba(249, 115, 22, 0.1);
+}
+
+body {
+  background: var(--white);
+  color: var(--black);
+}
+
+/* Navbar scrolled state */
+.navbar.scrolled { background: rgba(255, 255, 255, 0.97); border-color: rgba(249, 115, 22, 0.15); }
+.navbar.scrolled .brand span,
+.navbar.scrolled .nav-links a,
+.navbar.scrolled .mobile-menu-btn { color: #1a1a1a; }
+.navbar.scrolled .nav-search input { border-color: rgba(249, 115, 22, 0.3); background: rgba(249, 115, 22, 0.05); color: #1a1a1a; }
+
+/* Buttons */
+.btn-primary, .wood-sign-btn { background: #f97316 !important; color: white !important; border-color: #f97316 !important; }
+.btn-primary:hover, .wood-sign-btn:hover { background: #ea580c !important; }
+.btn-secondary { border-color: #f97316 !important; color: #f97316 !important; }
+.btn-secondary:hover { background: #f97316 !important; color: white !important; }
+
+/* Section headings */
+.section-kicker { color: #f97316; }
+.section-heading h2, .about-card h2, .contact-box h2 { color: #1a1a1a; }
+.section-heading p, .about-card p, .contact-box p { color: #4a4a4a; }
+
+/* Category cards */
+.category-card { background: var(--white); border: 1px solid rgba(249, 115, 22, 0.2); }
+.category-card:hover { border-color: #f97316; box-shadow: 0 12px 30px rgba(249, 115, 22, 0.12); }
+.category-badge { background: #fff7ed; color: #f97316; }
+.category-count { color: #f97316; }
+
+/* Preview cards */
+.preview-card { background: #fff7ed; border-color: rgba(249, 115, 22, 0.15); }
+.preview-card:hover { border-color: #f97316; }
+.preview-price { color: #ea580c; }
+
+/* Product cards */
+.product-card { background: var(--white); border: 1px solid rgba(249, 115, 22, 0.15); }
+.product-card:hover { border-color: #f97316; }
+.product-brand { color: #f97316; }
+.product-title { color: #1a1a1a; }
+.product-price { color: #ea580c; }
+.btn-add-cart { background: #f97316; }
+.btn-add-cart:hover { background: #ea580c; }
+
+/* Status badges */
+.status-badge.bestseller { background: #f97316; }
+.discount-badge { background: #dc2626; }
+
+/* About & Contact */
+.about-card, .contact-box { background: var(--white); border-color: rgba(249, 115, 22, 0.2); }
+.about-card::before, .contact-box::before { border-color: rgba(249, 115, 22, 0.08); }
+.feature { background: #fff7ed; border-color: rgba(249, 115, 22, 0.15); color: #4a4a4a; }
+.contact-link { border-color: #f97316; color: #f97316; }
+.contact-link:hover { background: #f97316; color: white; }
+.contact-link.secondary { border-color: #d1d5db; color: #4a4a4a; }
+.contact-link.secondary:hover { background: #f97316; color: white; border-color: #f97316; }
+
+/* Delivery cards */
+.delivery-card { background: var(--white); border-color: rgba(249, 115, 22, 0.2); }
+.delivery-card h3 { color: #f97316; }
+.delivery-card p { color: #4a4a4a; }
+
+/* Wholesale section */
+.wholesale-panel { background: #fff7ed; border-color: rgba(249, 115, 22, 0.2); }
+.wholesale-list li::before { color: #f97316; }
+.nav-wholesale-btn { background: #f97316; color: white; border-color: #f97316; }
+.nav-wholesale-btn:hover, .nav-wholesale-btn.active { background: #ea580c; }
+
+/* Filter buttons */
+.filter-btn { border-color: #f97316; color: #f97316; }
+.filter-btn.active, .filter-btn:hover { background: #f97316; color: white; }
+
+/* Cart sidebar */
+.cart-sidebar { background: white; }
+.btn-checkout { background: #f97316; }
+.btn-checkout:hover { background: #ea580c; }
+
+/* Footer */
+.footer { color: #4a4a4a; border-color: rgba(249, 115, 22, 0.1); }
+
+/* Scroll top */
+.scroll-top { background: #f97316; color: white; border-color: #f97316; }
+.scroll-top:hover { background: #ea580c; }
+
+/* Hero status pills */
+.hero-status-pill { background: rgba(249, 115, 22, 0.15); color: white; border-color: rgba(249, 115, 22, 0.4); }
+
+/* Inputs */
+.products-search input, .order-tracking-form input { background: white; color: #1a1a1a; border-color: rgba(249, 115, 22, 0.3); }
+.products-search input::placeholder { color: #9ca3af; }
+
+/* Loading spinner */
+.spinner { border-color: rgba(249, 115, 22, 0.2); border-top-color: #f97316; }
